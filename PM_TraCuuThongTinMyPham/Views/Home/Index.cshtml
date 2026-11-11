@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Trang chủ";
+}
+
+<!--Trang chủ: tiêu đề và 2 lối vào Danh mục, Tra cứu (chữ đã duyệt với thầy, giữ tối giản)-->
+<section class="home-hero">
+    <h1>Tra cứu thành phần trong công thức dược mỹ phẩm</h1>
+</section>
+
+<section class="home-cards home-cards-2">
+    <a class="home-card" href="@Url.Action("Index", "DanhMuc")">
+        <span class="home-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10" /></svg>
+        </span>
+        <h2>Danh mục</h2>
+        <p>Xem danh mục EU và ANNEX ASEAN.</p>
+        <span class="btn btn-primary home-btn">Xem danh mục</span>
+    </a>
+    <a class="home-card" href="@Url.Action("Index", "TraCuu")">
+        <span class="home-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+        </span>
+        <h2>Tra cứu</h2>
+        <p>Nhập hoặc tải danh sách thành phần để tra cứu.</p>
+        <span class="btn btn-primary home-btn">Tra cứu</span>
+    </a>
+</section>

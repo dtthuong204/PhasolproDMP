@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "Tra cứu";
+}
+
+<!--Trang tra cứu: thanh trái cố định (thông tin tra cứu + thùng rác), khung kết quả bên phải tự cuộn-->
+<div class="app-shell" id="trang-tra-cuu"
+     data-url-tra-cuu="@Url.Action("TraDanhSach", "TraCuu")"
+     data-url-chi-tiet="@Url.Action("ChiTiet", "TraCuu")">
+
+    <!--===== Thanh trái =====-->
+    <aside class="side-panel">
+        <h1 class="side-title">Tra cứu</h1>
+
+        <!--Chế độ nhập: nhập tay (gõ, dán) hoặc tải file (.docx đọc các bảng, .xlsx, .xls, .csv)-->
+        <div class="mode-switch input-mode" id="che-do-nhap">
+            <button class="mode-btn active" type="button" data-nhap="tay">Nhập tay</button>
+            <button class="mode-btn" type="button" data-nhap="file">Tải file</button>
+        </div>
+        <div class="input-zone" id="vung-nhap-tay">
+            <button class="btn btn-outline side-btn" id="nut-dan" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1" /><path d="M16 5h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h2" /></svg>
+                Dán
+            </button>
+        </div>
+        <div class="input-zone an" id="vung-tai-file">
+            <button class="drop-zone" id="vung-tha-file" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5M5 20h14" /></svg>
+                <span class="drop-main">Chọn file hoặc kéo thả vào đây</span>
+                <span class="drop-sub">.docx, .xlsx, .xls, .csv</span>
+            </button>
+        </div>
+        <input class="an" id="chon-file" type="file" accept=".docx,.csv,.xlsx,.xls" />
+
+        <!--Datagrid thông tin tra cứu: tracuu.js vẽ các dòng vào #luoi-dong-->
+        <section class="ingredient-grid">
+            <div class="ig-top">
+                <div class="ig-title">Thông tin tra cứu <span class="count-chip" id="dem-thanh-phan">0</span></div>
+                <button class="btn-xs" id="nut-xoa-da-chon" type="button" disabled>Xóa đã chọn</button>
+            </div>
+            <div class="ig-dup an" id="dai-bao-trung"></div>
+            <div class="ig-head">
+                <span class="ig-chk"><input type="checkbox" id="chon-tat-ca" title="Chọn tất cả" /></span>
+                <button class="ig-stt ig-sort sort-on" type="button" data-sapxep="stt">STT <span class="sort-icon">▲</span></button>
+                <button class="ig-name ig-sort" type="button" data-sapxep="ten">TÊN THÀNH PHẦN <span class="sort-icon">⇅</span></button>
+            </div>
+            <div class="ig-body" id="luoi-than">
+                <div id="luoi-dong"></div>
+                <!--Dòng trống cuối grid để nhập tên trực tiếp-->
+                <div class="ig-row ig-input-row">
+                    <span class="ig-chk"></span>
+                    <span class="ig-stt ig-plus">+</span>
+                    <input class="ig-input" id="o-nhap-moi" type="text" autocomplete="off" placeholder="Nhập tên thành phần…" />
+                </div>
+                <div class="ig-empty" id="luoi-trong">
+                    <strong>Chưa có thành phần nào</strong>
+                    Gõ tên rồi Enter, hoặc dán danh sách (Ctrl+V)
+                </div>
+            </div>
+        </section>
+
+        <!--Thùng rác: tích các tên đã xóa rồi bấm Hoàn tác để đưa về đúng vị trí cũ-->
+        <section class="bin-box">
+            <div class="bin-top">
+                <label class="bin-title">
+                    <span class="ig-chk"><input type="checkbox" id="chon-tat-ca-rac" title="Chọn tất cả" disabled /></span>
+                    Thùng rác <span class="count-chip" id="dem-thung-rac">0</span>
+                </label>
+                <button class="btn-xs btn-xs-primary" id="nut-hoan-tac-rac" type="button" disabled>↶ Hoàn tác</button>
+            </div>
+            <div class="bin-list" id="ds-thung-rac">
+                <div class="bin-empty">Thùng rác trống</div>
+            </div>
+        </section>
+
+        <!--Nút thao tác chính ở cuối thanh trái-->
+        <div class="side-actions">
+            <button class="btn btn-outline side-btn" id="nut-xoa-thong-tin" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></svg>
+                Xóa thông tin
+            </button>
+            <button class="btn btn-primary side-btn" id="nut-tra-cuu" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+                Tra cứu
+            </button>
+        </div>
+    </aside>
+
+    <!--===== Khung kết quả bên phải =====-->
+    <section class="result-pane">
+        <div class="pane-head">
+            <nav class="tab-bar pane-tabs" id="hang-tab">
+                <button class="tab-btn active" type="button" data-tab="eu">Danh mục EU</button>
+                <button class="tab-btn" type="button" data-tab="asean">Danh mục ANNEX ASEAN</button>
+            </nav>
+            <div class="pane-mode">
+                <div class="mode-switch" id="cong-tac-che-do">
+                    <button class="mode-btn active" type="button" data-chedo="chinhxac">Chính xác</button>
+                    <button class="mode-btn" type="button" data-chedo="tuongdoi">Tương đối</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pane-body" id="khung-cuon">
+            <div class="pane-content" id="noi-dung-ket-qua">
+                <!--Chưa tra: tracuu.js thay bằng kết quả sau khi tra-->
+                <div class="pane-empty" id="khung-chua-tra">
+                    <div class="pane-empty-icon">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+                    </div>
+                    <h2 id="tieu-de-chua-tra">Chưa có kết quả tra cứu</h2>
+                    <p id="mo-ta-chua-tra">Kết quả tra cứu theo Danh mục EU và Danh mục ANNEX ASEAN sẽ hiển thị tại đây.</p>
+                </div>
+            </div>
+            @Html.Partial("_Footer")
+        </div>
+    </section>
+</div>
+
+<!--Hộp chi tiết (ẩn): tracuu.js điền nội dung khi bấm ô tham chiếu EU hoặc "Xem chi tiết" ASEAN-->
+<div class="modal-overlay an" id="hop-chi-tiet-v2">
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+        <div id="noi-dung-hop"></div>
+    </div>
+</div>
+
+@section scripts {
+    @{
+        //gắn thời điểm sửa file để trình duyệt không dùng bản JS cũ trong cache
+        string phienBanJs = System.IO.File.GetLastWriteTime(Server.MapPath("~/Scripts/tracuu.js")).Ticks.ToString();
+    }
+    <!--SheetJS 0.20.3 (cdn.sheetjs.com): đọc file .xlsx/.xls/.csv; bộ giải nén zip đi kèm (XLSX.CFB) dùng để đọc .docx-->
+    <script src="@Url.Content("~/Scripts/xlsx.full.min.js")?v=0.20.3"></script>
+    <script src="@Url.Content("~/Scripts/tracuu.js")?v=@phienBanJs"></script>
+}

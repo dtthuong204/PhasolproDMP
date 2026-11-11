@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chép file này thành ConnectionStrings.config (cùng thư mục) rồi thay các chữ in hoa.
+     File ConnectionStrings.config không đưa lên git vì chứa tài khoản, mật khẩu.
+     Chỉ giữ MỘT dòng name="TraCuuDb". -->
+<connectionStrings>
+  <!-- Cách 1: máy chủ SQL Server, đăng nhập bằng tài khoản SQL Server (SQL Server Authentication) -->
+  <add name="TraCuuDb" connectionString="Data Source=TEN_MAY_CHU;Initial Catalog=TEN_DATABASE;User ID=TEN_TAI_KHOAN;Password=MAT_KHAU"
+    providerName="System.Data.SqlClient" />
+
+  <!-- Cách 2: SQL Server trên máy mình, đăng nhập Windows (Windows Authentication)
+  <add name="TraCuuDb" connectionString="Data Source=localhost\SQLEXPRESS;Initial Catalog=TEN_DATABASE;Integrated Security=True"
+    providerName="System.Data.SqlClient" />
+  -->
+</connectionStrings>

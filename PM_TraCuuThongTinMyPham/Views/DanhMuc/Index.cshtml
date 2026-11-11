@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Danh mục";
+}
+
+<!--Trang Danh mục: thanh trái cố định (13 danh mục), khung phải là bảng của danh mục đang chọn; danhmuc.js vẽ toàn bộ-->
+<div class="app-shell" id="trang-danh-muc"
+     data-url-du-lieu="@Url.Action("DuLieu", "DanhMuc")">
+
+    <!--===== Thanh trái =====-->
+    <aside class="dm-side">
+        <h1 class="side-title">Danh mục</h1>
+        <nav class="dm-list" id="ds-danh-muc">
+            <div class="dm-side-loading">Đang tải…</div>
+        </nav>
+    </aside>
+
+    <!--===== Khung phải =====-->
+    <section class="result-pane">
+        <div class="dm-head" id="dau-danh-muc"></div>
+        <div class="pane-body" id="khung-cuon">
+            <div class="pane-content" id="noi-dung-danh-muc">
+                <div class="pane-loading">Đang tải danh mục…</div>
+            </div>
+            @Html.Partial("_Footer")
+        </div>
+    </section>
+</div>
+
+<!--Hộp chi tiết (ẩn): danhmuc.js điền nội dung khi bấm ô ref hoặc bấm dòng-->
+<div class="modal-overlay an" id="hop-chi-tiet-dm">
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+        <div id="noi-dung-hop-dm"></div>
+    </div>
+</div>
+
+@section scripts {
+    @{
+        //gắn thời điểm sửa file để trình duyệt không dùng bản JS cũ trong cache
+        string phienBanJs = System.IO.File.GetLastWriteTime(Server.MapPath("~/Scripts/danhmuc.js")).Ticks.ToString();
+    }
+    <script src="@Url.Content("~/Scripts/danhmuc.js")?v=@phienBanJs"></script>
+}

@@ -1,0 +1,33 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.log
+
+# Gói NuGet: VS2013 tự tải lại khi build (packages.config)
+packages/
+
+# Chuỗi kết nối có thể chứa mật khẩu: chỉ đưa file mẫu .example lên git
+PM_TraCuuThongTinMyPham/Config/ConnectionStrings.config
+PM_TraCuuThongTinMyPham/Config/*.secret.config
+*.pubxml
+*.pubxml.user
+
+# Database, file sao lưu
+*.mdf
+*.ldf
+*.bak
+
+# Hệ điều hành
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Ghi chú riêng (hướng dẫn cài đặt, thông tin máy chủ): chỉ lưu trên máy, không đưa lên git
+_rieng/

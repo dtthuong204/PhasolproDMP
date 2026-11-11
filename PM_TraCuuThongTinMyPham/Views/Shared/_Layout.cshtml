@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - Phasolpro DMP</title>
+
+    <!--font Oswald (tiêu đề, logo) và Montserrat (nội dung) lấy từ Google Fonts-->
+    @{
+        //URL có ký tự @ nên để trong chuỗi C#, tránh Razor hiểu nhầm là code
+        string fontUrl = "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Oswald:wght@500;600;700&display=swap";
+    }
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="@fontUrl" />
+
+    <!--file css chính của trang-->
+    @{
+        //gắn thời điểm sửa file vào đường dẫn: sửa CSS xong trình duyệt tự tải bản mới, không dùng bản cũ trong cache
+        string phienBanCss = System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/Site.css")).Ticks.ToString();
+        //trang đặt ViewBag.BoCucUngDung = true thì dùng bố cục toàn màn hình (header + 2 vùng, không cuộn cả trang)
+        bool boCucUngDung = (ViewBag.BoCucUngDung == true);
+    }
+    <link rel="stylesheet" href="@Url.Content("~/Content/Site.css")?v=@phienBanCss" />
+</head>
+<body class="@(boCucUngDung ? "app-page" : "")">
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <!--Logo, bấm vào thì về trang chủ-->
+            <a class="brand" href="@Url.Action("Index", "Home")">Phasolpro DMP</a>
+
+            <nav class="main-nav">
+                <a class="nav-item @(ViewBag.ActiveTab == "danhmuc" ? "active" : "")" href="@Url.Action("Index", "DanhMuc")">Danh mục</a>
+                <a class="nav-item @(ViewBag.ActiveTab == "tracuu" ? "active" : "")" href="@Url.Action("Index", "TraCuu")">Tra cứu</a>
+            </nav>
+        </div>
+    </header>
+
+    @if (boCucUngDung)
+    {
+        <!--Trang dạng ứng dụng (Danh mục, Tra cứu): chiếm đúng chiều cao màn hình, trang tự đặt footer trong khung bên phải-->
+        <main class="app-main">
+            @RenderBody()
+        </main>
+    }
+    else
+    {
+        <!--Nội dung từng trang render trong main-->
+        <main class="site-main">
+            <div class="container">
+                @RenderBody()
+            </div>
+        </main>
+
+        @Html.Partial("_Footer")
+    }
+
+    @Scripts.Render("~/bundles/jquery")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
