@@ -10,12 +10,15 @@ namespace PM_TraCuuThongTinMyPham.Data
     //Chính xác: SYT trùng toàn bộ tên; ASEAN chứa trọn cụm từ. Tương đối: tên chất CHỨA tên nhập (như app cũ)
     public static class SoKhopTen
     {
-        // Chuẩn hóa tên để so sánh: bỏ khoảng trắng thừa (kể cả xuống dòng), chữ thường
+        // Chuẩn hóa tên để so sánh: bỏ khoảng trắng thừa (kể cả xuống dòng), chữ thường,
+        // dấu nháy cong / dấu phẩy trên (’ ‘ ′ ´ ʼ) coi như dấu nháy thẳng ' (danh mục ghi lẫn cả hai kiểu)
         public static string ChuanHoa(string value)
         {
             if (String.IsNullOrWhiteSpace(value))
                 return "";
-            return Regex.Replace(value.Trim(), @"\s+", " ").ToLowerInvariant();
+            string s = value.Replace('’', '\'').Replace('‘', '\'').Replace('′', '\'')
+                .Replace('´', '\'').Replace('ʼ', '\'');
+            return Regex.Replace(s.Trim(), @"\s+", " ").ToLowerInvariant();
         }
 
         // Tra danh sách tên (đã bỏ trùng, giữ thứ tự) trên danh mục, gom các chất liên quan vào kết quả

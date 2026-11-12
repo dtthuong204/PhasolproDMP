@@ -1,9 +1,12 @@
-﻿@model System.Web.Mvc.HandleErrorInfo
+﻿﻿@model System.Web.Mvc.HandleErrorInfo
 
 @{
-    ViewBag.Title = "Error";
+    ViewBag.Title = "Lỗi";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
-
+<!--Trang lỗi chung: người xem từ máy khác chỉ thấy trang này, không thấy chi tiết kỹ thuật (customErrors RemoteOnly)-->
+<section class="home-hero">
+    <h1>Đã có lỗi xảy ra</h1>
+    <p>Trang không xử lý được yêu cầu. Hãy thử lại sau ít phút.</p>
+    <a class="btn btn-primary" href="@Url.Action("Index", "Home")">Về trang chủ</a>
+</section>

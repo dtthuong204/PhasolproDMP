@@ -45,9 +45,9 @@ $(function () {
         return String(value == null ? "" : value).replace(/\s+/g, " ").trim();
     }
 
-    // khóa so trùng: không phân biệt hoa thường, bỏ khoảng trắng thừa (giống server)
+    // khóa so trùng: không phân biệt hoa thường, bỏ khoảng trắng thừa, dấu nháy cong coi như ' (giống SoKhopTen.ChuanHoa)
     function khoaTen(value) {
-        return lamGon(value).toLowerCase();
+        return lamGon(value).replace(/[’‘′´ʼ]/g, "'").toLowerCase();
     }
 
     // tách đoạn chữ dán vào thành danh sách tên: mỗi dòng một tên, dòng có nhiều ô (Excel) lấy ô đầu tiên không rỗng
@@ -1640,7 +1640,7 @@ $(function () {
         var zip = XLSX.CFB.read(new Uint8Array(buffer), { type: "array" });
         var tep = XLSX.CFB.find(zip, "/word/document.xml") || XLSX.CFB.find(zip, "word/document.xml");
         if (!tep || !tep.content)
-            throw new Error("Không phải file Word .docx");
+            throw new Error("Không phải tệp Word .docx");
         var xml = new TextDecoder("utf-8").decode(new Uint8Array(tep.content));
         var doc = new DOMParser().parseFromString(xml, "application/xml");
         var W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
@@ -1803,7 +1803,7 @@ $(function () {
         });
 
         var html = [];
-        html.push('<div class="modal-head"><div><h3 class="modal-title">Thêm thành phần từ file</h3>' +
+        html.push('<div class="modal-head"><div><h3 class="modal-title">Thêm thành phần từ tệp</h3>' +
             '<div class="modal-sub">' + maHoa(fileDoc.tenFile) + " · " + sheet.dsDong.length + " dòng có dữ liệu</div></div>" +
             '<button type="button" class="modal-close" aria-label="Đóng">×</button></div>');
         html.push('<div class="modal-body">');
@@ -1873,15 +1873,15 @@ $(function () {
     function docFile(file) {
         var phanMoRong = (/\.([^.]+)$/.exec(file.name) || ["", ""])[1].toLowerCase();
         if (phanMoRong === "doc") {
-            hienThongBao("Chưa đọc được file Word 97-2003 (.doc). Hãy mở bằng Word và lưu lại dạng .docx.");
+            hienThongBao("Chưa đọc được tệp Word 97-2003 (.doc). Hãy mở bằng Word và lưu lại dạng .docx.");
             return;
         }
         if ($.inArray(phanMoRong, ["docx", "csv", "xlsx", "xls"]) < 0) {
-            hienThongBao("Chỉ đọc được file .docx, .xlsx, .xls hoặc .csv.");
+            hienThongBao("Chỉ đọc được tệp .docx, .xlsx, .xls hoặc .csv.");
             return;
         }
         if (file.size > FILE_TOI_DA) {
-            hienThongBao("File quá lớn (tối đa 10 MB).");
+            hienThongBao("Tệp quá lớn (tối đa 10 MB).");
             return;
         }
         if (typeof XLSX === "undefined" || typeof TextDecoder === "undefined") {
@@ -1896,11 +1896,11 @@ $(function () {
             try {
                 dsSheet = laWord ? docDocx(reader.result) : docWorkbook(reader.result, phanMoRong === "csv");
             } catch (e) {
-                hienThongBao("Không đọc được file " + file.name + " (file hỏng, có mật khẩu hoặc sai định dạng).");
+                hienThongBao("Không đọc được tệp " + file.name + " (tệp hỏng, có mật khẩu hoặc sai định dạng).");
                 return;
             }
             if (!dsSheet.length) {
-                hienThongBao(laWord ? "File " + file.name + " không có bảng nào." : "File " + file.name + " không có dữ liệu.");
+                hienThongBao(laWord ? "Tệp " + file.name + " không có bảng nào." : "Tệp " + file.name + " không có dữ liệu.");
                 return;
             }
             fileDoc = { tenFile: file.name, dsSheet: dsSheet, laWord: laWord };
@@ -1908,12 +1908,12 @@ $(function () {
             veHopFile();
         };
         reader.onerror = function () {
-            hienThongBao("Không đọc được file " + file.name + ".");
+            hienThongBao("Không đọc được tệp " + file.name + ".");
         };
         reader.readAsArrayBuffer(file);
     }
 
-    // chế độ nhập: Nhập tay (nút Dán) / Tải file (vùng chọn file); grid dùng chung cho cả hai
+    // chế độ nhập: Nhập trực tiếp (gõ, nút Dán) / Nhập từ tệp (vùng chọn tệp); grid dùng chung cho cả hai
     $("#che-do-nhap").on("click", ".mode-btn", function () {
         var cheDoNhap = $(this).data("nhap");
         $("#che-do-nhap .mode-btn").each(function () {
@@ -1927,7 +1927,7 @@ $(function () {
         $("#chon-file").val("").trigger("click");
     });
 
-    // kéo thả file vào vùng Tải file
+    // kéo thả tệp vào vùng Nhập từ tệp
     $("#vung-tha-file").on("dragover dragenter", function (e) {
         e.preventDefault();
         $(this).addClass("keo-tha");
@@ -1978,7 +1978,7 @@ $(function () {
             luuTenDangSua();
         themTen(dsTen);
         dongHop();
-        hienThongBao("Đã thêm " + dsTen.length + " tên từ file " + fileDoc.tenFile);
+        hienThongBao("Đã thêm " + dsTen.length + " tên từ tệp " + fileDoc.tenFile);
         cuonXuongCuoi();
         $("#o-nhap-moi").focus();
     });
