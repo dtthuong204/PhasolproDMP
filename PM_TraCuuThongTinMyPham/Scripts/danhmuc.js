@@ -1136,6 +1136,9 @@
     function ganSuKien() {
         $("#ds-danh-muc").on("click", ".dm-item", function () {
             chonDanhMuc($(this).data("ma"));
+            // màn hình hẹp: bảng nằm dưới danh sách danh mục, cuộn xuống để thấy bảng vừa chọn
+            if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches)
+                document.getElementById("dau-danh-muc").scrollIntoView();
         });
 
         var $dau = $("#dau-danh-muc"), $noiDung = $("#noi-dung-danh-muc");

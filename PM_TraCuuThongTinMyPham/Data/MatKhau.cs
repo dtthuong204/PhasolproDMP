@@ -48,6 +48,29 @@ namespace PM_TraCuuThongTinMyPham.Data
             }
         }
 
+        //chuỗi băm giả (salt, hash toàn số 0) để tên đăng nhập không tồn tại cũng tốn thời gian tính như tên có thật
+        private static readonly string ChuoiBamGia = string.Format("{0}.{1}.{2}", SoVongLap,
+            Convert.ToBase64String(new byte[DoDaiSalt]), Convert.ToBase64String(new byte[DoDaiHash]));
+
+        // Dùng khi không tìm thấy tài khoản: vẫn tính băm một lần rồi trả về false,
+        // để người ngoài không đoán được tên đăng nhập có tồn tại hay không qua thời gian trả lời
+        public static bool KiemTraGia(string matKhau)
+        {
+            KiemTra(matKhau ?? "", ChuoiBamGia);
+            return false;
+        }
+
+        // "Dấu" của mật khẩu đang lưu (16 ký tự rút từ chuỗi băm), ghi vào cookie đăng nhập.
+        // Đổi hoặc đặt lại mật khẩu thì dấu đổi theo, các cookie cũ (thiết bị khác) hết hiệu lực
+        public static string TaoDau(string chuoiBam)
+        {
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] kq = sha.ComputeHash(Encoding.UTF8.GetBytes(chuoiBam ?? ""));
+                return Convert.ToBase64String(kq, 0, 12);
+            }
+        }
+
         // Kiểm tra độ mạnh: tối thiểu 8 ký tự, có chữ hoa, chữ thường và số; trả về câu báo lỗi hoặc null nếu đạt
         public static string KiemTraDoManh(string matKhau)
         {

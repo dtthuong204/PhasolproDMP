@@ -61,9 +61,10 @@ SELECT
                 using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
                 using (MySqlCommand cmd = new MySqlCommand(sql, conn))
                 {
-                    cmd.Parameters.Add("@ten", MySqlDbType.VarChar, 50).Value = tenDangNhap ?? "";
-                    cmd.Parameters.Add("@email", MySqlDbType.VarChar, 150).Value = email ?? "";
-                    cmd.Parameters.Add("@maSo", MySqlDbType.VarChar, 50).Value = maSoDN ?? "";
+                    //bỏ khoảng trắng hai đầu giống lúc lưu (ThemChu), nếu không " a@b.vn " sẽ không bị coi là trùng "a@b.vn"
+                    cmd.Parameters.Add("@ten", MySqlDbType.VarChar, 50).Value = (tenDangNhap ?? "").Trim();
+                    cmd.Parameters.Add("@email", MySqlDbType.VarChar, 150).Value = (email ?? "").Trim();
+                    cmd.Parameters.Add("@maSo", MySqlDbType.VarChar, 50).Value = (maSoDN ?? "").Trim();
                     KetNoiDB.MoKetNoi(conn);
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -81,7 +82,7 @@ SELECT
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
             }
             return kq;
         }
@@ -104,7 +105,7 @@ SELECT
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return 0;
             }
         }
@@ -164,7 +165,7 @@ SELECT LAST_INSERT_ID();";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return 0;
             }
         }
@@ -195,6 +196,51 @@ SELECT LAST_INSERT_ID();";
                 new MySqlParameter("@id", MySqlDbType.Int32) { Value = id });
         }
 
+        // Xóa hẳn một tài khoản; tài khoản doanh nghiệp thì xóa luôn thông tin doanh nghiệp và người liên hệ
+        // (một giao dịch). Không khôi phục được: chỉ muốn chặn đăng nhập thì dùng DatTrangThai (khóa)
+        public bool XoaTaiKhoan(int id)
+        {
+            Loi = null;
+            try
+            {
+                using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
+                {
+                    KetNoiDB.MoKetNoi(conn);
+                    using (MySqlTransaction gd = conn.BeginTransaction())
+                    {
+                        object idDN;
+                        using (MySqlCommand cmd = new MySqlCommand("SELECT DoanhNghiepID FROM TaiKhoan WHERE ID = @id", conn, gd))
+                        {
+                            cmd.Parameters.Add("@id", MySqlDbType.Int32).Value = id;
+                            idDN = cmd.ExecuteScalar();
+                        }
+                        int soDong;
+                        using (MySqlCommand cmd = new MySqlCommand("DELETE FROM TaiKhoan WHERE ID = @id", conn, gd))
+                        {
+                            cmd.Parameters.Add("@id", MySqlDbType.Int32).Value = id;
+                            soDong = cmd.ExecuteNonQuery();
+                        }
+                        if (soDong > 0 && idDN != null && idDN != DBNull.Value)
+                        {
+                            //người liên hệ tự xóa theo doanh nghiệp (khóa ngoại ON DELETE CASCADE)
+                            using (MySqlCommand cmd = new MySqlCommand("DELETE FROM DoanhNghiep WHERE ID = @idDN", conn, gd))
+                            {
+                                cmd.Parameters.Add("@idDN", MySqlDbType.Int32).Value = Convert.ToInt32(idDN);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        gd.Commit();
+                        return soDong > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Loi = KetNoiDB.ThongBaoLoi(ex);
+                return false;
+            }
+        }
+
         // Sửa họ tên, email, số điện thoại, vai trò của tài khoản KHÔNG phải doanh nghiệp (doanh nghiệp sửa bằng CapNhatDoanhNghiep)
         public bool CapNhatTaiKhoan(int id, string hoTen, string email, string soDienThoai, string vaiTro)
         {
@@ -220,7 +266,7 @@ WHERE ID = @id AND VaiTro <> 'DoanhNghiep' AND @VaiTro <> 'DoanhNghiep'";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return false;
             }
         }
@@ -271,7 +317,7 @@ ORDER BY ID;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return null;
             }
         }
@@ -309,7 +355,7 @@ SELECT
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
             }
             return kq;
         }
@@ -357,7 +403,7 @@ WHERE DoanhNghiepID = @idDN;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return false;
             }
         }
@@ -383,7 +429,7 @@ WHERE DoanhNghiepID = @idDN;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 kq.Clear();
             }
             return kq;
@@ -404,7 +450,7 @@ WHERE DoanhNghiepID = @idDN;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return false;
             }
         }

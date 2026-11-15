@@ -10,6 +10,9 @@ using PM_TraCuuThongTinMyPham.Models;
 namespace PM_TraCuuThongTinMyPham.Controllers
 {
     //đăng nhập, đăng xuất, đăng ký (Cá nhân / Doanh nghiệp), đổi mật khẩu
+    //ValidateInput(false): cho nhập ký tự < > & (vd mật khẩu "Ab<c1234", tên "Công ty A & B <VN>"), mặc định ASP.NET báo lỗi 500.
+    //An toàn vì view in ra bằng @ (Razor tự đổi < thành &lt;) và câu SQL dùng tham số @...
+    [ValidateInput(false)]
     public class TaiKhoanController : Controller
     {
         #region Đăng nhập / đăng xuất
@@ -38,6 +41,15 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 return View(model);
             }
 
+            //sai quá nhiều lần liên tiếp thì phải chờ (chống dò mật khẩu), xem Data/ChongDoMatKhau.cs
+            string ip = Request.UserHostAddress;
+            int phutCho = ChongDoMatKhau.SoPhutPhaiCho(model.TenDangNhap, ip);
+            if (phutCho > 0)
+            {
+                model.Loi = string.Format("Đăng nhập sai quá nhiều lần. Hãy thử lại sau {0} phút.", phutCho);
+                return View(model);
+            }
+
             TaiKhoanRepository repo = new TaiKhoanRepository();
             TaiKhoanRow tk = repo.GetTaiKhoanDangNhap(model.TenDangNhap);
             if (repo.Loi != null)
@@ -45,9 +57,12 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 model.Loi = "Lỗi khi tải dữ liệu: " + repo.Loi;
                 return View(model);
             }
-            //không nói rõ sai tên hay sai mật khẩu để người ngoài không dò được tên tài khoản
-            if (tk == null || !MatKhau.KiemTra(model.MatKhau, tk.MatKhauHash))
+            //không nói rõ sai tên hay sai mật khẩu để người ngoài không dò được tên tài khoản;
+            //tên không tồn tại vẫn tính băm một lần (KiemTraGia) để thời gian trả lời giống tên có thật
+            bool dungMatKhau = tk != null ? MatKhau.KiemTra(model.MatKhau, tk.MatKhauHash) : MatKhau.KiemTraGia(model.MatKhau);
+            if (!dungMatKhau)
             {
+                ChongDoMatKhau.GhiLanSai(model.TenDangNhap, ip);
                 model.Loi = "Tên đăng nhập hoặc mật khẩu không đúng.";
                 return View(model);
             }
@@ -57,6 +72,7 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 return View(model);
             }
 
+            ChongDoMatKhau.XoaLanSai(model.TenDangNhap, ip);
             GhiCookieDangNhap(tk, model.LuuTaiKhoan);
             repo.CapNhatDangNhapCuoi(tk.ID);
 
@@ -115,9 +131,9 @@ namespace PM_TraCuuThongTinMyPham.Controllers
             ViewBag.Title = "Đăng ký tài khoản";
 
             bool laDoanhNghiep = model.Loai == "doanhnghiep";
+            //bỏ các dòng người liên hệ để trống hết các ô
+            KiemTraNhap.BoLienHeTrong(model.DoanhNghiep);
             model.DSLoi = laDoanhNghiep ? KiemTraDoanhNghiep(model.DoanhNghiep) : KiemTraCaNhan(model.CaNhan);
-            //bỏ các dòng người liên hệ để trống
-            model.DoanhNghiep.DSLienHe.RemoveAll(lh => lh == null || String.IsNullOrWhiteSpace(lh.HoTen));
 
             if (model.DSLoi.Count == 0)
             {
@@ -261,6 +277,8 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 if (tk.VaiTro == VaiTro.CaNhan)
                     KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.Email, "Email");
                 KiemTraNhap.KiemTraEmail(model.DSLoi, model.Email, "Email");
+                KiemTraNhap.KiemTraDoDaiTaiKhoan(model.DSLoi, model.HoTen, model.Email, model.SoDienThoai,
+                    tk.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên");
             }
 
             if (model.DSLoi.Count == 0)
@@ -330,12 +348,15 @@ namespace PM_TraCuuThongTinMyPham.Controllers
             if (model.Loi != null)
                 return View(model);
 
-            if (!repo.DoiMatKhau(tk.ID, MatKhau.BamMatKhau(model.MatKhauMoi), false))
+            string hashMoi = MatKhau.BamMatKhau(model.MatKhauMoi);
+            if (!repo.DoiMatKhau(tk.ID, hashMoi, false))
             {
                 model.Loi = "Lỗi khi lưu dữ liệu: " + repo.Loi;
                 return View(model);
             }
-            //ghi lại cookie để bỏ cờ "phải đổi mật khẩu" (giữ lựa chọn "Lưu tài khoản" của lần đăng nhập)
+            //ghi lại cookie để bỏ cờ "phải đổi mật khẩu" (giữ lựa chọn "Lưu tài khoản" của lần đăng nhập);
+            //cookie mới mang dấu của mật khẩu mới, cookie ở các thiết bị khác hết hiệu lực
+            tk.MatKhauHash = hashMoi;
             tk.PhaiDoiMatKhau = false;
             NguoiDung.CapNhatCookie(HttpContext.GetOwinContext().Authentication, tk);
             TempData["ThongBao"] = "Đã đổi mật khẩu.";
@@ -363,6 +384,7 @@ namespace PM_TraCuuThongTinMyPham.Controllers
             KiemTraNhap.KiemTraBatBuoc(loi, m.HoTen, "Họ và tên");
             KiemTraNhap.KiemTraBatBuoc(loi, m.Email, "Email");
             KiemTraNhap.KiemTraEmail(loi, m.Email, "Email");
+            KiemTraNhap.KiemTraDoDaiTaiKhoan(loi, m.HoTen, m.Email, m.SoDienThoai, "Họ và tên");
             KiemTraTaiKhoan(loi, m.TenDangNhap, m.MatKhau, m.NhapLaiMatKhau);
             return loi;
         }

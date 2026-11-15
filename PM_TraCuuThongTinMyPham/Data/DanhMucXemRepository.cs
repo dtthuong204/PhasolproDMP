@@ -184,7 +184,7 @@ ORDER BY l.BangSYT, l.SytID, l.ID;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 kq = new DanhMucXemVM();
             }
             return kq;

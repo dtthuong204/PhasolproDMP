@@ -8,7 +8,9 @@ using PM_TraCuuThongTinMyPham.Models;
 namespace PM_TraCuuThongTinMyPham.Controllers
 {
     //trang quản trị: chỉ tài khoản Admin
+    //ValidateInput(false): cho nhập ký tự < > & trong các ô và ô tìm kiếm (lý do an toàn: xem TaiKhoanController)
     [PhanQuyen(Roles = VaiTro.Admin)]
+    [ValidateInput(false)]
     public class QuanTriController : Controller
     {
         //vai trò Admin được đổi qua lại khi sửa tài khoản (doanh nghiệp giữ nguyên vai trò)
@@ -74,11 +76,39 @@ namespace PM_TraCuuThongTinMyPham.Controllers
             return RedirectToAction("TaiKhoan", new { vaiTro = vaiTro, tuKhoa = tuKhoa });
         }
 
+        // Xóa hẳn một tài khoản (không tự xóa chính mình nên luôn còn ít nhất một Admin); không khôi phục được
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult XoaTaiKhoan(int id, string vaiTro, string tuKhoa)
+        {
+            if (id == NguoiDung.LayID(User))
+            {
+                TempData["Loi"] = "Không thể tự xóa tài khoản đang đăng nhập.";
+            }
+            else
+            {
+                TaiKhoanRepository repo = new TaiKhoanRepository();
+                TaiKhoanRow tk = repo.GetTaiKhoan(id);
+                if (tk != null && repo.XoaTaiKhoan(id))
+                    TempData["ThongBao"] = string.Format("Đã xóa tài khoản {0}.", tk.TenDangNhap);
+                else
+                    TempData["Loi"] = "Lỗi khi lưu dữ liệu: " + (repo.Loi ?? "không tìm thấy tài khoản.");
+            }
+            return RedirectToAction("TaiKhoan", new { vaiTro = vaiTro, tuKhoa = tuKhoa });
+        }
+
         // Đặt lại mật khẩu: tạo mật khẩu tạm, hiện một lần cho Admin, người dùng phải đổi khi đăng nhập
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DatLaiMatKhau(int id, string vaiTro, string tuKhoa)
         {
+            //đặt lại mật khẩu của chính mình thì cookie đang dùng hết hiệu lực ngay, không kịp xem mật khẩu tạm
+            if (id == NguoiDung.LayID(User))
+            {
+                TempData["Loi"] = "Không đặt lại mật khẩu của tài khoản đang đăng nhập ở đây. Hãy dùng mục Đổi mật khẩu.";
+                return RedirectToAction("TaiKhoan", new { vaiTro = vaiTro, tuKhoa = tuKhoa });
+            }
+
             TaiKhoanRepository repo = new TaiKhoanRepository();
             TaiKhoanRow tk = repo.GetTaiKhoan(id);
             string matKhauTam = MatKhau.TaoMatKhauTam();
@@ -123,8 +153,10 @@ namespace PM_TraCuuThongTinMyPham.Controllers
             }
             else
             {
-                KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.HoTen, model.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên");
+                string tenOHoTen = model.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên";
+                KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.HoTen, tenOHoTen);
                 KiemTraNhap.KiemTraEmail(model.DSLoi, model.Email, "Email");
+                KiemTraNhap.KiemTraDoDaiTaiKhoan(model.DSLoi, model.HoTen, model.Email, model.SoDienThoai, tenOHoTen);
             }
 
             TaiKhoanRepository repo = new TaiKhoanRepository();
@@ -177,11 +209,12 @@ namespace PM_TraCuuThongTinMyPham.Controllers
         #endregion
 
         #region Xem / sửa tài khoản
-        public ActionResult SuaTaiKhoan(int id)
+        public ActionResult SuaTaiKhoan(int? id)
         {
             DatTieuDe("Sửa tài khoản");
             TaiKhoanRepository repo = new TaiKhoanRepository();
-            TaiKhoanRow tk = repo.GetTaiKhoan(id);
+            //địa chỉ thiếu ID hoặc ID không phải số (id = null): coi như không tìm thấy
+            TaiKhoanRow tk = id.HasValue ? repo.GetTaiKhoan(id.Value) : null;
             if (tk == null)
             {
                 TempData["Loi"] = repo.Loi != null ? "Lỗi khi tải dữ liệu: " + repo.Loi : "Không tìm thấy tài khoản.";
@@ -249,8 +282,10 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                     model.VaiTro = tk.VaiTro;
                 if (Array.IndexOf(DSVaiTroDoiDuoc, model.VaiTro) < 0)
                     model.DSLoi.Add("Vai trò không hợp lệ.");
-                KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.HoTen, model.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên");
+                string tenOHoTen = model.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên";
+                KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.HoTen, tenOHoTen);
                 KiemTraNhap.KiemTraEmail(model.DSLoi, model.Email, "Email");
+                KiemTraNhap.KiemTraDoDaiTaiKhoan(model.DSLoi, model.HoTen, model.Email, model.SoDienThoai, tenOHoTen);
             }
 
             if (model.DSLoi.Count == 0)

@@ -126,7 +126,7 @@ FROM EU_AnnexII;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 kq = new DanhMucTraCuu();
             }
             return kq;

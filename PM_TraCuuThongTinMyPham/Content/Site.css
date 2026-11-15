@@ -4259,3 +4259,112 @@ a.cell-link:hover {
 a.btn-xs {
     text-decoration: none;
 }
+
+/* =====================================================================
+   Màn hình hẹp (điện thoại): trang Danh mục, Tra cứu, Quản lý tài khoản, các form tài khoản
+   Đặt cuối file để đè các quy tắc màn hình rộng ở trên
+   ===================================================================== */
+@media (max-width: 767px) {
+    /* Danh mục, Tra cứu: bỏ bố cục 2 vùng cố định, xếp thanh trái lên trên, kết quả bên dưới, cuộn cả trang */
+    body.app-page {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .app-page .topbar .container {
+        padding: 0 16px;
+    }
+
+    .app-main,
+    .app-shell {
+        display: block;
+    }
+
+    .side-panel,
+    .dm-side {
+        width: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    /* Danh mục: danh sách 13 danh mục cao tối đa 1/3 màn hình, tự cuộn */
+    .dm-list {
+        max-height: 34vh;
+    }
+
+    /* Tra cứu: lưới thành phần cao vừa phải, tự cuộn */
+    .ig-body {
+        min-height: 150px;
+        max-height: 44vh;
+    }
+
+    .pane-head {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        padding: 10px 16px 0;
+    }
+
+    .dm-head {
+        padding: 12px 16px 0;
+    }
+
+    .dm-title-row,
+    .dm-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .dm-search {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    /* khung kết quả cao theo nội dung (cuộn dọc theo trang), bảng rộng vẫn cuộn ngang trong khung */
+    .pane-body {
+        padding: 16px 16px 0;
+        overflow-x: auto;
+    }
+
+    .result-pane .site-footer {
+        margin: 0 -16px;
+        padding: 22px 16px 20px;
+    }
+
+    /* Quản lý tài khoản */
+    .admin-head {
+        gap: 12px;
+    }
+
+    .admin-head h1 {
+        font-size: 22px;
+    }
+
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .admin-search .form-input {
+        width: auto;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .admin-table {
+        min-width: 860px;
+    }
+
+    /* form Đăng ký, Thêm / Sửa tài khoản, Tài khoản của tôi: mỗi ô một dòng */
+    .form-grid,
+    .form-grid-2,
+    .form-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}

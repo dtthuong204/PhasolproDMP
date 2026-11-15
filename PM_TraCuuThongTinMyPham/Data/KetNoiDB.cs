@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.Web;
 using MySql.Data.MySqlClient;
 
 namespace PM_TraCuuThongTinMyPham.Data
@@ -27,6 +29,29 @@ namespace PM_TraCuuThongTinMyPham.Data
                 throw new ConfigurationErrorsException(string.Format("Không tìm thấy connection string '{0}' trong Config\\ConnectionStrings.config", TenKetNoi));
 
             return new MySqlConnection(cauHinh.ConnectionString);
+        }
+
+        // Đổi lỗi database thành câu báo cho người dùng (các Repository ghi vào thuộc tính Loi).
+        // Người xem từ máy khác không thấy chi tiết kỹ thuật (tên máy chủ, tên bảng, tài khoản database);
+        // chạy trên máy mình (localhost) hoặc ngoài web vẫn thấy nguyên văn để sửa lỗi, giống customErrors RemoteOnly
+        public static string ThongBaoLoi(Exception ex)
+        {
+            MySqlException loiMySql = ex as MySqlException;
+            if (loiMySql != null)
+            {
+                //1062: trùng khóa UNIQUE (hai người cùng đăng ký một tên / email trong cùng lúc, lọt qua bước kiểm tra trùng)
+                if (loiMySql.Number == 1062)
+                    return "tên đăng nhập, email hoặc mã số doanh nghiệp đã có trong hệ thống.";
+                //1406: chữ dài hơn cột
+                if (loiMySql.Number == 1406)
+                    return "có ô nhập dài quá mức cho phép.";
+            }
+
+            HttpContext web = HttpContext.Current;
+            if (web == null || web.Request.IsLocal)
+                return ex.Message;
+            System.Diagnostics.Trace.TraceError(ex.ToString());
+            return "không truy cập được cơ sở dữ liệu, hãy thử lại sau ít phút.";
         }
 
         // Mở kết nối rồi đặt kiểu so sánh chữ cho chữ viết trong câu SQL và tham số @...

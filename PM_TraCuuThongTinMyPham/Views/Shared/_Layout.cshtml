@@ -109,6 +109,13 @@
             if (menu && menu.open && !menu.contains(e.target))
                 menu.open = false;
         });
+
+        // đang tải dữ liệu (Danh mục, Tra cứu) mà phiên đăng nhập đã hết: server trả mã 403 (PhanQuyenAttribute),
+        // đưa về trang đăng nhập, đăng nhập xong quay lại đúng trang đang xem
+        $(document).ajaxError(function (e, xhr) {
+            if (xhr.status === 403)
+                window.location.href = "@Url.Action("DangNhap", "TaiKhoan")?ReturnUrl=" + encodeURIComponent(window.location.pathname + window.location.search);
+        });
     </script>
     @RenderSection("scripts", required: false)
 </body>

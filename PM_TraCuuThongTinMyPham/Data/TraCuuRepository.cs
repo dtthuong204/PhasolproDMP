@@ -46,7 +46,7 @@ WHERE Bang = @bang AND RowID = @rowId";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 return null;
             }
         }
@@ -100,7 +100,7 @@ WHERE ID = @rowId";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
             }
         }
         #endregion

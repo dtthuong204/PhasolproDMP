@@ -17,6 +17,7 @@ namespace PM_TraCuuThongTinMyPham.Models
         private const string ClaimTenHienThi = "phasolpro:TenHienThi";
         private const string ClaimDoanhNghiepID = "phasolpro:DoanhNghiepID";
         private const string ClaimPhaiDoiMatKhau = "phasolpro:PhaiDoiMatKhau";
+        private const string ClaimDauMatKhau = "phasolpro:DauMatKhau";
 
         // Tạo danh tính (ClaimsIdentity) từ tài khoản vừa đăng nhập để ghi vào cookie
         public static ClaimsIdentity TaoDanhTinh(TaiKhoanRow tk)
@@ -31,6 +32,7 @@ namespace PM_TraCuuThongTinMyPham.Models
                 ds.Add(new Claim(ClaimDoanhNghiepID, tk.DoanhNghiepID.Value.ToString()));
             if (tk.PhaiDoiMatKhau)
                 ds.Add(new Claim(ClaimPhaiDoiMatKhau, "1"));
+            ds.Add(new Claim(ClaimDauMatKhau, Data.MatKhau.TaoDau(tk.MatKhauHash)));
             return new ClaimsIdentity(ds, LoaiXacThuc, ClaimTypes.Name, ClaimTypes.Role);
         }
 
@@ -78,6 +80,23 @@ namespace PM_TraCuuThongTinMyPham.Models
         public static bool PhaiDoiMatKhau(IPrincipal user)
         {
             return LayClaim(user, ClaimPhaiDoiMatKhau) == "1";
+        }
+
+        // Cookie đăng nhập còn khớp với tài khoản đang lưu trong database không (PhanQuyenAttribute gọi ở mỗi yêu cầu).
+        // Hết hiệu lực (phải đăng nhập lại): tài khoản đã xóa, đã khóa, hoặc mật khẩu đã đổi / đặt lại ở nơi khác
+        public static bool ConHieuLuc(IPrincipal user, TaiKhoanRow tk)
+        {
+            return tk != null && tk.DangHoatDong && LayClaim(user, ClaimDauMatKhau) == Data.MatKhau.TaoDau(tk.MatKhauHash);
+        }
+
+        // Thông tin ghi trong cookie có khác database không (Admin vừa đổi vai trò, tên, đặt cờ đổi mật khẩu):
+        // khác thì ghi lại cookie theo database
+        public static bool CanGhiLaiCookie(IPrincipal user, TaiKhoanRow tk)
+        {
+            return LayVaiTro(user) != tk.VaiTro
+                || PhaiDoiMatKhau(user) != tk.PhaiDoiMatKhau
+                || LayClaim(user, ClaimTenHienThi) != (tk.TenHienThi ?? "")
+                || LayClaim(user, ClaimTypes.Name) != tk.TenDangNhap;
         }
 
         //chữ cái đầu cho ô tròn avatar

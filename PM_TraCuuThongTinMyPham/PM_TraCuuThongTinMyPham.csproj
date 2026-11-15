@@ -139,6 +139,7 @@
     <Compile Include="Controllers\QuanTriController.cs" />
     <Compile Include="Data\KetNoiDB.cs" />
     <Compile Include="Data\KiemTraNhap.cs" />
+    <Compile Include="Data\ChongDoMatKhau.cs" />
     <Compile Include="Data\MatKhau.cs" />
     <Compile Include="Data\ReCaptcha.cs" />
     <Compile Include="Data\TaiKhoanRepository.cs" />
@@ -188,6 +189,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\KhongTimThay.cshtml" />
     <Content Include="Views\DanhMuc\Index.cshtml" />
     <Content Include="Views\TraCuu\Index.cshtml" />
     <Content Include="Views\Home\GioiThieu.cshtml" />

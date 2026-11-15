@@ -4,7 +4,7 @@ using PM_TraCuuThongTinMyPham.Models;
 
 namespace PM_TraCuuThongTinMyPham.Controllers
 {
-    //trang Danh mục (menu DANH MỤC): xem 3 danh mục Sở Y tế, 5 Annex EU, 5 Annex ASEAN, không cần đăng nhập
+    //trang Danh mục (menu DANH MỤC): xem 3 danh mục Sở Y tế, 5 Annex EU, 5 Annex ASEAN; phải đăng nhập (mọi vai trò)
     public class DanhMucController : Controller
     {
         //khung trang; dữ liệu do Scripts/danhmuc.js tải riêng qua DuLieu

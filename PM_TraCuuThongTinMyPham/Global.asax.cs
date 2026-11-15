@@ -14,6 +14,8 @@ namespace PM_TraCuuThongTinMyPham
     {
         protected void Application_Start()
         {
+            //không gửi header X-AspNetMvc-Version (lộ phiên bản MVC cho người ngoài)
+            MvcHandler.DisableMvcResponseHeader = true;
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);

@@ -17,5 +17,17 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 return View("GioiThieu", new DangNhapVM());
             return View();
         }
+
+        //trang "Không tìm thấy" (404): Web.config (customErrors) chuyển tới đây khi địa chỉ không có trong web
+        [AllowAnonymous]
+        public ActionResult KhongTimThay()
+        {
+            ViewBag.Title = "Không tìm thấy trang";
+            ViewBag.ActiveTab = "";
+            Response.StatusCode = 404;
+            //không để IIS thay bằng trang 404 mặc định của nó
+            Response.TrySkipIisCustomErrors = true;
+            return View();
+        }
     }
 }
