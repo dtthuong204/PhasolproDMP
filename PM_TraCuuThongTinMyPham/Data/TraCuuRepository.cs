@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using PM_TraCuuThongTinMyPham.Models;
 
 namespace PM_TraCuuThongTinMyPham.Data
@@ -14,13 +13,13 @@ namespace PM_TraCuuThongTinMyPham.Data
         private const string SqlChiTietAsean = @"
 SELECT Annex, RefNo, TenChat, CAS, PhamViSuDung, GioiHanToiDa, DieuKienKhac, CanhBaoNhan,
        CanCu, NgayApDung, NgayHetHieuLuc, GhiChu, TrangThaiHieuLuc
-FROM dbo.vw_ACD_TatCa
+FROM vw_ACD_TatCa
 WHERE Bang = @bang AND RowID = @rowId";
 
         private const string SqlChiTietEU = @"
 SELECT Annex, RefNo, TenChat, TenINCI, CAS, PhamViSuDung, GioiHanToiDa, DieuKienKhac, CanhBaoNhan,
        Regulation, NgayCapNhat
-FROM dbo.vw_EU_TatCa
+FROM vw_EU_TatCa
 WHERE Bang = @bang AND RowID = @rowId";
 
         // Lấy nội dung đầy đủ của một dòng Annex (nguon = "ACD" hoặc "EU") cho hộp Xem chi tiết
@@ -31,13 +30,13 @@ WHERE Bang = @bang AND RowID = @rowId";
             bool laAsean = (nguon == "ACD");
             try
             {
-                using (SqlConnection conn = KetNoiDB.TaoKetNoi())
-                using (SqlCommand cmd = new SqlCommand(laAsean ? SqlChiTietAsean : SqlChiTietEU, conn))
+                using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
+                using (MySqlCommand cmd = new MySqlCommand(laAsean ? SqlChiTietAsean : SqlChiTietEU, conn))
                 {
-                    cmd.Parameters.Add("@bang", SqlDbType.NVarChar, 128).Value = bang ?? "";
-                    cmd.Parameters.Add("@rowId", SqlDbType.Int).Value = rowId;
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    cmd.Parameters.Add("@bang", MySqlDbType.VarChar, 128).Value = bang ?? "";
+                    cmd.Parameters.Add("@rowId", MySqlDbType.Int32).Value = rowId;
+                    KetNoiDB.MoKetNoi(conn);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read())
                             return null;
@@ -54,13 +53,13 @@ WHERE Bang = @bang AND RowID = @rowId";
 
         //các cột chỉ có ở bảng gốc Annex EU; {0} = tên bảng (đã kiểm tra trong DSBangEU), {1} = cột Colour index / màu của Annex IV
         private const string SqlThongTinThemEU = @"
-SELECT [EC Number] AS EC, [Other Directives/Regulations] AS ChiThiKhac, [SCCS opinions] AS SCCS,
-       [Chemical/IUPAC Name] AS IUPAC, [Identified INGREDIENTS or substances e.g.] AS ThanhPhanNhanDien, [CMR] AS CMR{1}
-FROM dbo.{0}
+SELECT `EC Number` AS EC, `Other Directives/Regulations` AS ChiThiKhac, `SCCS opinions` AS SCCS,
+       `Chemical/IUPAC Name` AS IUPAC, `Identified INGREDIENTS or substances e.g.` AS ThanhPhanNhanDien, `CMR` AS CMR{1}
+FROM `{0}`
 WHERE ID = @rowId";
 
         private const string SqlCotMauAnnexIV = @",
-       [Colour index Number / Name of Common Ingredients Glossary] AS ColourIndex, [Color] AS MauSac";
+       `Colour index Number / Name of Common Ingredients Glossary` AS ColourIndex, `Color` AS MauSac";
 
         //chỉ cho phép đọc 5 bảng Annex EU (tên bảng không truyền được bằng tham số)
         private static readonly string[] DSBangEU = { "EU_AnnexII", "EU_AnnexIII", "EU_AnnexIV", "EU_AnnexV", "EU_AnnexVI" };
@@ -76,12 +75,12 @@ WHERE ID = @rowId";
             string sql = string.Format(SqlThongTinThemEU, bang, laAnnexIV ? SqlCotMauAnnexIV : "");
             try
             {
-                using (SqlConnection conn = KetNoiDB.TaoKetNoi())
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
+                using (MySqlCommand cmd = new MySqlCommand(sql, conn))
                 {
-                    cmd.Parameters.Add("@rowId", SqlDbType.Int).Value = rowId;
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    cmd.Parameters.Add("@rowId", MySqlDbType.Int32).Value = rowId;
+                    KetNoiDB.MoKetNoi(conn);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read())
                             return;
