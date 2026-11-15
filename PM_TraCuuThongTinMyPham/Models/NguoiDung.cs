@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Principal;
+using Microsoft.Owin.Security;
 
 namespace PM_TraCuuThongTinMyPham.Models
 {
@@ -31,6 +32,18 @@ namespace PM_TraCuuThongTinMyPham.Models
             if (tk.PhaiDoiMatKhau)
                 ds.Add(new Claim(ClaimPhaiDoiMatKhau, "1"));
             return new ClaimsIdentity(ds, LoaiXacThuc, ClaimTypes.Name, ClaimTypes.Role);
+        }
+
+        // Ghi lại cookie sau khi người đang đăng nhập đổi thông tin (họ tên, email...) để header hiện tên mới;
+        // giữ nguyên lựa chọn "Lưu tài khoản" của lần đăng nhập
+        public static void CapNhatCookie(IAuthenticationManager xacThuc, TaiKhoanRow tk)
+        {
+            if (xacThuc == null || tk == null)
+                return;
+            AuthenticateResult hienTai = xacThuc.AuthenticateAsync(LoaiXacThuc).Result;
+            bool luu = hienTai != null && hienTai.Properties != null && hienTai.Properties.IsPersistent;
+            xacThuc.SignOut(LoaiXacThuc);
+            xacThuc.SignIn(new AuthenticationProperties { IsPersistent = luu }, TaoDanhTinh(tk));
         }
 
         public static int LayID(IPrincipal user)

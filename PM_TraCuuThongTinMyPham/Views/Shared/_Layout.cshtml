@@ -23,6 +23,7 @@
         //góc tài khoản theo người đang đăng nhập (server vẫn chặn từng trang bằng [PhanQuyen])
         bool daDangNhap = Request.IsAuthenticated;
         string vaiTro = PM_TraCuuThongTinMyPham.Models.NguoiDung.LayVaiTro(User);
+        bool laAdmin = vaiTro == PM_TraCuuThongTinMyPham.Models.VaiTro.Admin;
     }
     <link rel="stylesheet" href="@Url.Content("~/Content/Site.css")?v=@phienBanCss" />
 </head>
@@ -35,6 +36,11 @@
             <nav class="main-nav">
                 <a class="nav-item @(ViewBag.ActiveTab == "danhmuc" ? "active" : "")" href="@Url.Action("Index", "DanhMuc")">Danh mục</a>
                 <a class="nav-item @(ViewBag.ActiveTab == "tracuu" ? "active" : "")" href="@Url.Action("Index", "TraCuu")">Tra cứu</a>
+                <!--chỉ Admin thấy (server vẫn chặn bằng [PhanQuyen(Roles = Admin)])-->
+                @if (laAdmin)
+                {
+                    <a class="nav-item @(ViewBag.ActiveTab == "quantri" ? "active" : "")" href="@Url.Action("TaiKhoan", "QuanTri")">Tài khoản</a>
+                }
             </nav>
 
             @if (daDangNhap)
@@ -52,6 +58,10 @@
                             <span>@User.Identity.Name · @PM_TraCuuThongTinMyPham.Models.VaiTro.TenHienThi(vaiTro)</span>
                         </div>
                         <a class="account-drop-item" href="@Url.Action("DoiMatKhau", "TaiKhoan")">Đổi mật khẩu</a>
+                        @if (laAdmin)
+                        {
+                            <a class="account-drop-item" href="@Url.Action("TaiKhoan", "QuanTri")">Quản lý tài khoản</a>
+                        }
                         <!--Đăng xuất: xóa luôn danh sách tra cứu lưu tạm trong tab-->
                         @using (Html.BeginForm("DangXuat", "TaiKhoan", FormMethod.Post, new { onsubmit = "try { sessionStorage.clear(); } catch (e) { }" }))
                         {

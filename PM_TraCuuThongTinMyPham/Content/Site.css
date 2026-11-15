@@ -4225,3 +4225,37 @@ body.app-page {
 .dm-item.zero.chophep {
     color: var(--grey);
 }
+
+/* =====================================================================
+   Quản lý tài khoản (bản nộp, TK4): ô chỉ xem, ghi chú trong form, tên tài khoản bấm được
+   ===================================================================== */
+.form-input[readonly],
+.form-input:disabled {
+    border-color: var(--line);
+    background: #f3f4f7;
+    color: #3b3f52;
+}
+
+.reg-note {
+    margin: 0;
+    padding: 0 18px 14px;
+    color: #4b5263;
+    font-size: 12px;
+}
+
+.reg-note-top {
+    padding: 0 2px;
+}
+
+a.cell-link {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+a.cell-link:hover {
+    text-decoration: underline;
+}
+
+a.btn-xs {
+    text-decoration: none;
+}

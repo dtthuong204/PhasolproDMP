@@ -244,9 +244,9 @@ namespace PM_TraCuuThongTinMyPham.Controllers
         private static List<string> KiemTraCaNhan(DangKyCaNhanVM m)
         {
             List<string> loi = new List<string>();
-            BatBuoc(loi, m.HoTen, "Họ và tên");
-            BatBuoc(loi, m.Email, "Email");
-            KiemTraEmail(loi, m.Email, "Email");
+            KiemTraNhap.KiemTraBatBuoc(loi, m.HoTen, "Họ và tên");
+            KiemTraNhap.KiemTraBatBuoc(loi, m.Email, "Email");
+            KiemTraNhap.KiemTraEmail(loi, m.Email, "Email");
             KiemTraTaiKhoan(loi, m.TenDangNhap, m.MatKhau, m.NhapLaiMatKhau);
             return loi;
         }
@@ -255,50 +255,19 @@ namespace PM_TraCuuThongTinMyPham.Controllers
         {
             List<string> loi = new List<string>();
             KiemTraTaiKhoan(loi, m.TenDangNhap, m.MatKhau, m.NhapLaiMatKhau);
-            BatBuoc(loi, m.LoaiHinh, "Loại hình doanh nghiệp");
-            BatBuoc(loi, m.MaSoDN, "Mã số doanh nghiệp");
-            BatBuoc(loi, m.TenTiengViet, "Tên doanh nghiệp (tiếng Việt)");
-            BatBuoc(loi, m.TinhThanh, "Tỉnh/Thành phố");
-            BatBuoc(loi, m.XaPhuong, "Xã/Phường");
-            BatBuoc(loi, m.DiaChiChiTiet, "Địa chỉ chi tiết");
-            BatBuoc(loi, m.SoDienThoai, "Số điện thoại doanh nghiệp");
-            BatBuoc(loi, m.DaiDien_HoTen, "Họ và tên người đại diện");
-            BatBuoc(loi, m.DaiDien_Email, "Email người đại diện");
-            BatBuoc(loi, m.DaiDien_ChucVu, "Chức vụ người đại diện");
-            BatBuoc(loi, m.DaiDien_SoDienThoai, "Số điện thoại người đại diện");
-            KiemTraEmail(loi, m.Email, "Email doanh nghiệp");
-            KiemTraEmail(loi, m.DaiDien_Email, "Email người đại diện");
-            int nam;
-            if (!String.IsNullOrWhiteSpace(m.NamThanhLap) &&
-                (!Int32.TryParse(m.NamThanhLap.Trim(), out nam) || nam < 1900 || nam > DateTime.Now.Year))
-                loi.Add("Năm thành lập không hợp lệ.");
+            KiemTraNhap.KiemTraDoanhNghiep(loi, m);
             return loi;
         }
 
-        //tên đăng nhập 3-50 ký tự: chữ không dấu, số, dấu chấm, gạch dưới, gạch ngang
+        //tên đăng nhập + mật khẩu (đủ mạnh, nhập lại khớp)
         private static void KiemTraTaiKhoan(List<string> loi, string ten, string matKhau, string nhapLai)
         {
-            if (String.IsNullOrWhiteSpace(ten))
-                loi.Add("Hãy nhập Tên đăng nhập.");
-            else if (!Regex.IsMatch(ten.Trim(), @"^[A-Za-z0-9._-]{3,50}$"))
-                loi.Add("Tên đăng nhập dài 3-50 ký tự, chỉ gồm chữ không dấu, số, dấu chấm, gạch dưới, gạch ngang.");
+            KiemTraNhap.KiemTraTenDangNhap(loi, ten);
             string loiMatKhau = MatKhau.KiemTraDoManh(matKhau);
             if (loiMatKhau != null)
                 loi.Add(loiMatKhau);
             else if (matKhau != nhapLai)
                 loi.Add("Nhập lại mật khẩu không khớp.");
-        }
-
-        private static void BatBuoc(List<string> loi, string giaTri, string tenO)
-        {
-            if (String.IsNullOrWhiteSpace(giaTri))
-                loi.Add(string.Format("Hãy nhập {0}.", tenO));
-        }
-
-        private static void KiemTraEmail(List<string> loi, string email, string tenO)
-        {
-            if (!String.IsNullOrWhiteSpace(email) && !Regex.IsMatch(email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                loi.Add(string.Format("{0} không đúng định dạng.", tenO));
         }
         #endregion
     }

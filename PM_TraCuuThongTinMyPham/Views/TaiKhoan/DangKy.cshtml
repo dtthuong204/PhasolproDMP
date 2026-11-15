@@ -2,15 +2,6 @@
 @{
     bool laDoanhNghiep = Model.Loai == "doanhnghiep";
     PM_TraCuuThongTinMyPham.Models.DangKyDoanhNghiepVM dn = Model.DoanhNghiep;
-    //loại hình doanh nghiệp theo Luật Doanh nghiệp 2020, thêm hộ kinh doanh
-    string[] dsLoaiHinh = { "Công ty TNHH một thành viên", "Công ty TNHH hai thành viên trở lên", "Công ty cổ phần",
-        "Công ty hợp danh", "Doanh nghiệp tư nhân", "Hộ kinh doanh", "Khác" };
-    //34 tỉnh, thành phố sau sắp xếp đơn vị hành chính 2025 (gợi ý, vẫn gõ tự do được)
-    string[] dsTinh = { "Hà Nội", "Thành phố Hồ Chí Minh", "Hải Phòng", "Đà Nẵng", "Cần Thơ", "Huế", "An Giang", "Bắc Ninh",
-        "Cà Mau", "Cao Bằng", "Điện Biên", "Đắk Lắk", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Tĩnh", "Hưng Yên", "Khánh Hòa",
-        "Lai Châu", "Lạng Sơn", "Lào Cai", "Lâm Đồng", "Nghệ An", "Ninh Bình", "Phú Thọ", "Quảng Ngãi", "Quảng Ninh",
-        "Quảng Trị", "Sơn La", "Tây Ninh", "Thái Nguyên", "Thanh Hóa", "Tuyên Quang", "Vĩnh Long" };
-    string[] dsChucVu = { "Giám đốc", "Tổng giám đốc", "Phó giám đốc", "Chủ tịch Hội đồng quản trị", "Chủ doanh nghiệp", "Trưởng phòng" };
 }
 
 @helper O(string nhan, string ten, string giaTri, bool batBuoc, string goiY, string kieu, string danhSach)
@@ -77,89 +68,7 @@
                 </div>
             </section>
 
-            <section class="reg-section">
-                <h2 class="reg-head">Thông tin doanh nghiệp</h2>
-                <div class="form-grid">
-                    <label class="form-field">
-                        <span class="form-label">Loại hình doanh nghiệp<span class="req">*</span></span>
-                        <select class="form-input" name="DoanhNghiep.LoaiHinh" required>
-                            <option value="">-- Chọn loại hình --</option>
-                            @foreach (string lh in dsLoaiHinh)
-                            {
-                                <option value="@lh" @(dn.LoaiHinh == lh ? "selected" : "")>@lh</option>
-                            }
-                        </select>
-                    </label>
-                    @O("Mã số doanh nghiệp", "DoanhNghiep.MaSoDN", dn.MaSoDN, true, "Nhập mã số doanh nghiệp", "text", null)
-                    @O("Tên doanh nghiệp (tiếng Việt)", "DoanhNghiep.TenTiengViet", dn.TenTiengViet, true, "Nhập tên tiếng Việt", "text", null)
-                    @O("Tên doanh nghiệp (tiếng Anh)", "DoanhNghiep.TenTiengAnh", dn.TenTiengAnh, false, "Nhập tên tiếng Anh", "text", null)
-                    @O("Địa chỉ tiếng Anh", "DoanhNghiep.DiaChiTiengAnh", dn.DiaChiTiengAnh, false, "Nhập địa chỉ tiếng Anh", "text", null)
-                    @O("Cơ quan chủ quản", "DoanhNghiep.CoQuanChuQuan", dn.CoQuanChuQuan, false, "Nhập cơ quan chủ quản", "text", null)
-                    @O("Năm thành lập", "DoanhNghiep.NamThanhLap", dn.NamThanhLap, false, "VD: 2010", "text", null)
-                    @O("Số đăng ký kinh doanh", "DoanhNghiep.SoDKKD", dn.SoDKKD, false, "Nhập số đăng ký kinh doanh", "text", null)
-                    @O("Tên viết tắt", "DoanhNghiep.TenVietTat", dn.TenVietTat, false, "Nhập tên viết tắt", "text", null)
-                </div>
-            </section>
-
-            <section class="reg-section">
-                <h2 class="reg-head">Địa chỉ</h2>
-                <div class="form-grid">
-                    @O("Tỉnh/Thành phố", "DoanhNghiep.TinhThanh", dn.TinhThanh, true, "Chọn hoặc gõ tỉnh/thành phố", "text", "ds-tinh")
-                    @O("Xã/Phường", "DoanhNghiep.XaPhuong", dn.XaPhuong, true, "Nhập xã/phường", "text", null)
-                    @O("Địa chỉ chi tiết", "DoanhNghiep.DiaChiChiTiet", dn.DiaChiChiTiet, true, "Số nhà, tên đường…", "text", null)
-                    @O("Số điện thoại", "DoanhNghiep.SoDienThoai", dn.SoDienThoai, true, "Nhập số điện thoại", "text", null)
-                    @O("Fax", "DoanhNghiep.Fax", dn.Fax, false, "Nhập số fax", "text", null)
-                    @O("Email", "DoanhNghiep.Email", dn.Email, false, "Nhập email doanh nghiệp", "email", null)
-                    @O("Website", "DoanhNghiep.Website", dn.Website, false, "http://…", "text", null)
-                </div>
-                <datalist id="ds-tinh">
-                    @foreach (string t in dsTinh)
-                    {
-                        <option value="@t"></option>
-                    }
-                </datalist>
-            </section>
-
-            <section class="reg-section">
-                <h2 class="reg-head">Người đại diện</h2>
-                <div class="form-grid form-grid-4">
-                    @O("Họ và tên", "DoanhNghiep.DaiDien_HoTen", dn.DaiDien_HoTen, true, "Nhập họ và tên", "text", null)
-                    @O("Email (dùng để đăng nhập)", "DoanhNghiep.DaiDien_Email", dn.DaiDien_Email, true, "Nhập email", "email", null)
-                    @O("Chức vụ", "DoanhNghiep.DaiDien_ChucVu", dn.DaiDien_ChucVu, true, "Chọn hoặc gõ chức vụ", "text", "ds-chuc-vu")
-                    @O("Số điện thoại", "DoanhNghiep.DaiDien_SoDienThoai", dn.DaiDien_SoDienThoai, true, "Nhập số điện thoại", "text", null)
-                </div>
-                <datalist id="ds-chuc-vu">
-                    @foreach (string cv in dsChucVu)
-                    {
-                        <option value="@cv"></option>
-                    }
-                </datalist>
-            </section>
-
-            <section class="reg-section">
-                <h2 class="reg-head">Văn phòng đại diện</h2>
-                <div class="form-grid">
-                    @O("Tên văn phòng đại diện", "DoanhNghiep.VPDD_Ten", dn.VPDD_Ten, false, "Nhập tên văn phòng", "text", null)
-                    @O("Số điện thoại", "DoanhNghiep.VPDD_SoDienThoai", dn.VPDD_SoDienThoai, false, "Nhập số điện thoại", "text", null)
-                    @O("Địa chỉ", "DoanhNghiep.VPDD_DiaChi", dn.VPDD_DiaChi, false, "Nhập địa chỉ văn phòng", "text", null)
-                </div>
-            </section>
-
-            <section class="reg-section">
-                <h2 class="reg-head">Người liên hệ <button class="btn-xs btn-xs-primary reg-add" id="nut-them-lien-he" type="button">+ Thêm</button></h2>
-                <div id="ds-lien-he">
-                    @for (int i = 0; i < dn.DSLienHe.Count; i++)
-                    {
-                        <div class="form-grid form-grid-4 lien-he-row">
-                            @O("Họ và tên", "DoanhNghiep.DSLienHe[" + i + "].HoTen", dn.DSLienHe[i].HoTen, false, "Nhập họ và tên", "text", null)
-                            @O("Chức vụ", "DoanhNghiep.DSLienHe[" + i + "].ChucVu", dn.DSLienHe[i].ChucVu, false, "Nhập chức vụ", "text", null)
-                            @O("Số điện thoại", "DoanhNghiep.DSLienHe[" + i + "].SoDienThoai", dn.DSLienHe[i].SoDienThoai, false, "Nhập số điện thoại", "text", null)
-                            @O("Email", "DoanhNghiep.DSLienHe[" + i + "].Email", dn.DSLienHe[i].Email, false, "Nhập email", "email", null)
-                            <button class="lien-he-xoa" type="button" title="Bỏ người liên hệ này">×</button>
-                        </div>
-                    }
-                </div>
-            </section>
+            @Html.Partial("_ThongTinDoanhNghiep", dn)
         }
 
         if (!String.IsNullOrEmpty(Model.ReCaptchaSiteKey))
@@ -183,38 +92,6 @@
         <!--Google reCAPTCHA v2, giao diện tiếng Việt-->
         <script src="https://www.google.com/recaptcha/api.js?hl=vi" async defer></script>
     }
-    <script>
-        // người liên hệ: thêm / bỏ dòng, đánh lại số thứ tự [0], [1]... để server đọc đúng danh sách
-        $(function () {
-            var $ds = $("#ds-lien-he");
-            if (!$ds.length)
-                return;
-
-            function danhSoLai() {
-                $ds.find(".lien-he-row").each(function (i) {
-                    $(this).find("input").each(function () {
-                        this.name = this.name.replace(/DSLienHe\[\d+\]/, "DSLienHe[" + i + "]");
-                    });
-                });
-            }
-
-            $("#nut-them-lien-he").on("click", function () {
-                var $mau = $ds.find(".lien-he-row").first();
-                var $moi = $mau.clone();
-                $moi.find("input").val("");
-                $ds.append($moi);
-                danhSoLai();
-                $moi.find("input").first().focus();
-            });
-
-            $ds.on("click", ".lien-he-xoa", function () {
-                var $dong = $(this).closest(".lien-he-row");
-                if ($ds.find(".lien-he-row").length > 1)
-                    $dong.remove();
-                else
-                    $dong.find("input").val("");
-                danhSoLai();
-            });
-        });
-    </script>
+    <!--người liên hệ: thêm / bỏ dòng-->
+    <script src="@Url.Content("~/Scripts/taikhoan.js")"></script>
 }

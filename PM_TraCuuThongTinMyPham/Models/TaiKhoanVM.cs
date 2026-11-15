@@ -149,6 +149,39 @@ namespace PM_TraCuuThongTinMyPham.Models
         {
             DSLienHe = new List<LienHeRow>();
         }
+
+        //đọc 1 dòng bảng DoanhNghiep (ô trống thành chuỗi rỗng); danh sách liên hệ đọc riêng
+        public static DangKyDoanhNghiepVM fromReader(MySqlDataReader reader)
+        {
+            if (reader == null)
+                return null;
+            return new DangKyDoanhNghiepVM
+            {
+                LoaiHinh = Convert.ToString(reader["LoaiHinh"]),
+                MaSoDN = Convert.ToString(reader["MaSoDN"]),
+                TenTiengViet = Convert.ToString(reader["TenTiengViet"]),
+                TenTiengAnh = Convert.ToString(reader["TenTiengAnh"]),
+                DiaChiTiengAnh = Convert.ToString(reader["DiaChiTiengAnh"]),
+                CoQuanChuQuan = Convert.ToString(reader["CoQuanChuQuan"]),
+                NamThanhLap = Convert.ToString(reader["NamThanhLap"]),
+                SoDKKD = Convert.ToString(reader["SoDKKD"]),
+                TenVietTat = Convert.ToString(reader["TenVietTat"]),
+                TinhThanh = Convert.ToString(reader["TinhThanh"]),
+                XaPhuong = Convert.ToString(reader["XaPhuong"]),
+                DiaChiChiTiet = Convert.ToString(reader["DiaChiChiTiet"]),
+                SoDienThoai = Convert.ToString(reader["SoDienThoai"]),
+                Fax = Convert.ToString(reader["Fax"]),
+                Email = Convert.ToString(reader["Email"]),
+                Website = Convert.ToString(reader["Website"]),
+                DaiDien_HoTen = Convert.ToString(reader["DaiDien_HoTen"]),
+                DaiDien_Email = Convert.ToString(reader["DaiDien_Email"]),
+                DaiDien_ChucVu = Convert.ToString(reader["DaiDien_ChucVu"]),
+                DaiDien_SoDienThoai = Convert.ToString(reader["DaiDien_SoDienThoai"]),
+                VPDD_Ten = Convert.ToString(reader["VPDD_Ten"]),
+                VPDD_SoDienThoai = Convert.ToString(reader["VPDD_SoDienThoai"]),
+                VPDD_DiaChi = Convert.ToString(reader["VPDD_DiaChi"])
+            };
+        }
     }
 
     //1 người liên hệ của doanh nghiệp
@@ -193,17 +226,47 @@ namespace PM_TraCuuThongTinMyPham.Models
         }
     }
 
-    //form Admin cấp tài khoản Sở Y tế
-    public class ThemSoYTeVM
+    //form Admin thêm tài khoản (mọi vai trò); mật khẩu tạm do hệ thống tạo, người dùng phải đổi khi đăng nhập lần đầu
+    public class ThemTaiKhoanVM
     {
-        public string HoTen { get; set; }
+        public string VaiTro { get; set; }
         public string TenDangNhap { get; set; }
+        //3 ô dưới dùng cho Cá nhân, Sở Y tế, Quản trị; doanh nghiệp lấy theo người đại diện
+        public string HoTen { get; set; }
         public string Email { get; set; }
         public string SoDienThoai { get; set; }
+        public DangKyDoanhNghiepVM DoanhNghiep { get; set; }
         public List<string> DSLoi { get; set; }
 
-        public ThemSoYTeVM()
+        public ThemTaiKhoanVM()
         {
+            VaiTro = Models.VaiTro.CaNhan;
+            DoanhNghiep = new DangKyDoanhNghiepVM();
+            DSLoi = new List<string>();
+        }
+    }
+
+    //trang Admin xem / sửa một tài khoản
+    public class SuaTaiKhoanVM
+    {
+        public int ID { get; set; }
+        //vai trò mới chọn (Cá nhân / Sở Y tế / Quản trị); doanh nghiệp không đổi vai trò
+        public string VaiTro { get; set; }
+        public string HoTen { get; set; }
+        public string Email { get; set; }
+        public string SoDienThoai { get; set; }
+        public DangKyDoanhNghiepVM DoanhNghiep { get; set; }
+
+        //phần chỉ xem, đọc lại từ database mỗi lần (không lấy từ form gửi lên)
+        public TaiKhoanRow TaiKhoan { get; set; }
+        //đang sửa chính tài khoản đang đăng nhập: không đổi vai trò
+        public bool LaMinh { get; set; }
+        public List<string> DSLoi { get; set; }
+        public string ThongBao { get; set; }
+
+        public SuaTaiKhoanVM()
+        {
+            DoanhNghiep = new DangKyDoanhNghiepVM();
             DSLoi = new List<string>();
         }
     }

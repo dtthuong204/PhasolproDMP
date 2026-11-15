@@ -136,7 +136,9 @@
     <Compile Include="Controllers\TraCuuController.cs" />
     <Compile Include="Controllers\PhanQuyenAttribute.cs" />
     <Compile Include="Controllers\TaiKhoanController.cs" />
+    <Compile Include="Controllers\QuanTriController.cs" />
     <Compile Include="Data\KetNoiDB.cs" />
+    <Compile Include="Data\KiemTraNhap.cs" />
     <Compile Include="Data\MatKhau.cs" />
     <Compile Include="Data\ReCaptcha.cs" />
     <Compile Include="Data\TaiKhoanRepository.cs" />
@@ -162,12 +164,15 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Config\ConnectionStrings.config" />
-    <Content Include="Config\ConnectionStrings.config.example" />
+    <Content Include="Config\ConnectionStrings.config.example">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Config\AppSettings.secret.config.example" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Scripts\tracuu.js" />
+    <Content Include="Scripts\taikhoan.js" />
     <Content Include="Scripts\danhmuc.js" />
     <Content Include="Scripts\xlsx.full.min.js" />
     <Content Include="Web.config" />
@@ -191,6 +196,10 @@
     <Content Include="Views\TaiKhoan\DangKy.cshtml" />
     <Content Include="Views\TaiKhoan\DoiMatKhau.cshtml" />
     <Content Include="Views\TaiKhoan\KhongCoQuyen.cshtml" />
+    <Content Include="Views\TaiKhoan\_ThongTinDoanhNghiep.cshtml" />
+    <Content Include="Views\QuanTri\TaiKhoan.cshtml" />
+    <Content Include="Views\QuanTri\ThemTaiKhoan.cshtml" />
+    <Content Include="Views\QuanTri\SuaTaiKhoan.cshtml" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

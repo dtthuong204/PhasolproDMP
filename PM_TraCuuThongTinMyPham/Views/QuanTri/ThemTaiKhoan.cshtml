@@ -1,0 +1,82 @@
+﻿@using PM_TraCuuThongTinMyPham.Models
+@model ThemTaiKhoanVM
+@{
+    bool laDoanhNghiep = Model.VaiTro == VaiTro.DoanhNghiep;
+    //tab chọn vai trò: mã vai trò và tên hiển thị
+    string[][] dsVaiTro = {
+        new string[] { VaiTro.CaNhan, "Cá nhân" },
+        new string[] { VaiTro.DoanhNghiep, "Doanh nghiệp" },
+        new string[] { VaiTro.SoYTe, "Sở Y tế" },
+        new string[] { VaiTro.Admin, "Quản trị" }
+    };
+}
+
+<!--Admin thêm tài khoản: chọn vai trò bằng tab; hệ thống tạo mật khẩu tạm, người dùng phải đổi khi đăng nhập lần đầu-->
+<section class="reg-page">
+    <h1 class="reg-title">Thêm tài khoản</h1>
+    <nav class="sub-tabs reg-tabs">
+        @foreach (string[] vt in dsVaiTro)
+        {
+            <a class="sub-tab @(Model.VaiTro == vt[0] ? "active" : "")" href="@Url.Action("ThemTaiKhoan", new { vaiTro = vt[0] })">@vt[1]</a>
+        }
+    </nav>
+
+    @if (Model.DSLoi.Count > 0)
+    {
+        <div class="notice notice-error">
+            <ul class="reg-errors">
+                @foreach (string loi in Model.DSLoi)
+                {
+                    <li>@loi</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @using (Html.BeginForm("ThemTaiKhoan", "QuanTri", FormMethod.Post, new { @class = "reg-form" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="VaiTro" value="@Model.VaiTro" />
+
+        <section class="reg-section">
+            <h2 class="reg-head">Tài khoản đăng nhập</h2>
+            <div class="form-grid">
+                <label class="form-field">
+                    <span class="form-label">Tên đăng nhập<span class="req">*</span></span>
+                    <input class="form-input" type="text" name="TenDangNhap" value="@Model.TenDangNhap" placeholder="Chữ không dấu, số, . _ -" required autofocus />
+                </label>
+                @if (!laDoanhNghiep)
+                {
+                    <label class="form-field">
+                        <span class="form-label">@(Model.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên")<span class="req">*</span></span>
+                        <input class="form-input" type="text" name="HoTen" value="@Model.HoTen"
+                               placeholder="@(Model.VaiTro == VaiTro.SoYTe ? "VD: Sở Y tế TP. Hồ Chí Minh" : "Nhập họ và tên")" required />
+                    </label>
+                    <label class="form-field">
+                        <span class="form-label">Email</span>
+                        <input class="form-input" type="email" name="Email" value="@Model.Email" placeholder="Nhập email" />
+                    </label>
+                    <label class="form-field">
+                        <span class="form-label">Số điện thoại</span>
+                        <input class="form-input" type="text" name="SoDienThoai" value="@Model.SoDienThoai" placeholder="Nhập số điện thoại" />
+                    </label>
+                }
+            </div>
+            <p class="reg-note">Mật khẩu tạm do hệ thống tạo, hiện một lần sau khi lưu.</p>
+        </section>
+
+        if (laDoanhNghiep)
+        {
+            @Html.Partial("~/Views/TaiKhoan/_ThongTinDoanhNghiep.cshtml", Model.DoanhNghiep)
+        }
+
+        <div class="reg-buttons">
+            <button class="btn btn-primary" type="submit">Thêm tài khoản</button>
+            <a class="btn btn-outline" href="@Url.Action("TaiKhoan")">Hủy</a>
+        </div>
+    }
+</section>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/taikhoan.js")"></script>
+}
