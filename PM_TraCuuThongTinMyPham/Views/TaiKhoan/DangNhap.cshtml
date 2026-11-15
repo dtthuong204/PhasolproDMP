@@ -1,0 +1,10 @@
+﻿@model PM_TraCuuThongTinMyPham.Models.DangNhapVM
+
+<!--Trang đăng nhập: mở khi vào trang cần đăng nhập mà chưa đăng nhập (kèm ReturnUrl)-->
+<section class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-title">Đăng nhập</h1>
+        @Html.Partial("_FormDangNhap", Model)
+        <a class="auth-home" href="@Url.Action("Index", "Home")">‹ Về trang chủ</a>
+    </div>
+</section>

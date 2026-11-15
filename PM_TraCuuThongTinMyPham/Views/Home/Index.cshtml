@@ -2,7 +2,11 @@
     ViewBag.Title = "Trang chủ";
 }
 
-<!--Trang chủ: tiêu đề và 2 lối vào Danh mục, Tra cứu (chữ đã duyệt với thầy, giữ tối giản)-->
+<!--Trang chủ (đã đăng nhập): tiêu đề và 2 lối vào Danh mục, Tra cứu (chữ đã duyệt với thầy, giữ tối giản)-->
+@if (ViewBag.ThongBao != null)
+{
+    <div class="notice notice-ok">@ViewBag.ThongBao</div>
+}
 <section class="home-hero">
     <h1>Tra cứu thành phần trong công thức dược mỹ phẩm</h1>
 </section>

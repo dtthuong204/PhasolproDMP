@@ -1,0 +1,13 @@
+﻿@model PM_TraCuuThongTinMyPham.Models.DangNhapVM
+
+<!--Trang chủ khi chưa đăng nhập: tiêu đề bên trái, ô đăng nhập bên phải (theo docs/giao-dien/Đăng nhập/Primary page.png)-->
+<section class="intro">
+    <div class="intro-text">
+        <h1>Tra cứu thành phần trong công thức dược mỹ phẩm</h1>
+        <p>Tra cứu theo Danh mục EU và Danh mục ANNEX ASEAN.</p>
+    </div>
+    <div class="auth-card">
+        <h2 class="auth-title">Đăng nhập</h2>
+        @Html.Partial("~/Views/TaiKhoan/_FormDangNhap.cshtml", Model)
+    </div>
+</section>
