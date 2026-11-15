@@ -57,6 +57,7 @@
                             <strong>@PM_TraCuuThongTinMyPham.Models.NguoiDung.LayTenHienThi(User)</strong>
                             <span>@User.Identity.Name · @PM_TraCuuThongTinMyPham.Models.VaiTro.TenHienThi(vaiTro)</span>
                         </div>
+                        <a class="account-drop-item" href="@Url.Action("CuaToi", "TaiKhoan")">Tài khoản của tôi</a>
                         <a class="account-drop-item" href="@Url.Action("DoiMatKhau", "TaiKhoan")">Đổi mật khẩu</a>
                         @if (laAdmin)
                         {

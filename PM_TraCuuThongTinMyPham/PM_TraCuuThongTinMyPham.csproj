@@ -197,6 +197,7 @@
     <Content Include="Views\TaiKhoan\DoiMatKhau.cshtml" />
     <Content Include="Views\TaiKhoan\KhongCoQuyen.cshtml" />
     <Content Include="Views\TaiKhoan\_ThongTinDoanhNghiep.cshtml" />
+    <Content Include="Views\TaiKhoan\CuaToi.cshtml" />
     <Content Include="Views\QuanTri\TaiKhoan.cshtml" />
     <Content Include="Views\QuanTri\ThemTaiKhoan.cshtml" />
     <Content Include="Views\QuanTri\SuaTaiKhoan.cshtml" />

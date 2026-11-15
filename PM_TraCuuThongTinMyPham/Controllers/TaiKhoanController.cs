@@ -180,6 +180,122 @@ namespace PM_TraCuuThongTinMyPham.Controllers
         }
         #endregion
 
+        #region Tài khoản của tôi
+        //xem + tự sửa thông tin của tài khoản đang đăng nhập (mọi vai trò); tên đăng nhập, vai trò không sửa;
+        //doanh nghiệp sửa được thông tin doanh nghiệp trừ mã số doanh nghiệp (chỉ Admin sửa)
+        public ActionResult CuaToi()
+        {
+            ViewBag.Title = "Tài khoản của tôi";
+            TaiKhoanRepository repo = new TaiKhoanRepository();
+            TaiKhoanRow tk = repo.GetTaiKhoan(NguoiDung.LayID(User));
+            if (tk == null)
+            {
+                TempData["ThongBao"] = repo.Loi != null ? "Lỗi khi tải dữ liệu: " + repo.Loi : "Không tìm thấy tài khoản.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            SuaTaiKhoanVM model = new SuaTaiKhoanVM
+            {
+                ID = tk.ID,
+                VaiTro = tk.VaiTro,
+                HoTen = tk.HoTen,
+                Email = tk.Email,
+                SoDienThoai = tk.SoDienThoai,
+                TaiKhoan = tk,
+                LaMinh = true,
+                ThongBao = TempData["ThongBao"] as string
+            };
+            if (tk.VaiTro == VaiTro.DoanhNghiep && tk.DoanhNghiepID.HasValue)
+            {
+                DangKyDoanhNghiepVM dn = repo.GetDoanhNghiep(tk.DoanhNghiepID.Value);
+                if (dn != null)
+                    model.DoanhNghiep = dn;
+                else
+                    model.DSLoi.Add("Lỗi khi tải dữ liệu: " + (repo.Loi ?? "không tìm thấy thông tin doanh nghiệp."));
+            }
+            if (model.DoanhNghiep.DSLienHe.Count == 0)
+                model.DoanhNghiep.DSLienHe.Add(new LienHeRow());
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CuaToi(SuaTaiKhoanVM model)
+        {
+            if (model == null)
+                model = new SuaTaiKhoanVM();
+            if (model.DoanhNghiep == null)
+                model.DoanhNghiep = new DangKyDoanhNghiepVM();
+            model.DSLoi = new List<string>();
+            ViewBag.Title = "Tài khoản của tôi";
+
+            //luôn sửa tài khoản đang đăng nhập (không lấy ID, vai trò từ form gửi lên)
+            TaiKhoanRepository repo = new TaiKhoanRepository();
+            TaiKhoanRow tk = repo.GetTaiKhoan(NguoiDung.LayID(User));
+            if (tk == null)
+            {
+                TempData["ThongBao"] = repo.Loi != null ? "Lỗi khi tải dữ liệu: " + repo.Loi : "Không tìm thấy tài khoản.";
+                return RedirectToAction("Index", "Home");
+            }
+            model.ID = tk.ID;
+            model.VaiTro = tk.VaiTro;
+            model.TaiKhoan = tk;
+            model.LaMinh = true;
+            bool laDoanhNghiep = tk.VaiTro == VaiTro.DoanhNghiep && tk.DoanhNghiepID.HasValue;
+            KiemTraNhap.BoLienHeTrong(model.DoanhNghiep);
+
+            if (laDoanhNghiep)
+            {
+                //mã số doanh nghiệp chỉ xem: lấy lại giá trị đang lưu để kiểm tra và hiện lại trên form
+                DangKyDoanhNghiepVM dnCu = repo.GetDoanhNghiep(tk.DoanhNghiepID.Value);
+                if (dnCu == null)
+                    model.DSLoi.Add("Lỗi khi tải dữ liệu: " + (repo.Loi ?? "không tìm thấy thông tin doanh nghiệp."));
+                else
+                    model.DoanhNghiep.MaSoDN = dnCu.MaSoDN;
+                KiemTraNhap.KiemTraDoanhNghiep(model.DSLoi, model.DoanhNghiep);
+            }
+            else
+            {
+                KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.HoTen, tk.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên");
+                //cá nhân đăng ký bằng email nên email bắt buộc
+                if (tk.VaiTro == VaiTro.CaNhan)
+                    KiemTraNhap.KiemTraBatBuoc(model.DSLoi, model.Email, "Email");
+                KiemTraNhap.KiemTraEmail(model.DSLoi, model.Email, "Email");
+            }
+
+            if (model.DSLoi.Count == 0)
+            {
+                string email = laDoanhNghiep ? model.DoanhNghiep.DaiDien_Email : model.Email;
+                model.DSLoi.AddRange(repo.KiemTraTrungKhiSua(tk.ID, email, laDoanhNghiep ? tk.DoanhNghiepID.Value : 0, null));
+                if (repo.Loi != null)
+                    model.DSLoi.Add("Lỗi khi tải dữ liệu: " + repo.Loi);
+            }
+
+            bool daLuu = false;
+            if (model.DSLoi.Count == 0)
+            {
+                daLuu = laDoanhNghiep
+                    ? repo.CapNhatDoanhNghiep(tk.DoanhNghiepID.Value, model.DoanhNghiep, false)
+                    : repo.CapNhatTaiKhoan(tk.ID, model.HoTen, model.Email, model.SoDienThoai, tk.VaiTro);
+                if (!daLuu)
+                    model.DSLoi.Add("Lỗi khi lưu dữ liệu: " + repo.Loi);
+            }
+            if (!daLuu)
+            {
+                if (model.DoanhNghiep.DSLienHe.Count == 0)
+                    model.DoanhNghiep.DSLienHe.Add(new LienHeRow());
+                return View(model);
+            }
+
+            //ghi lại cookie để header hiện tên mới
+            TaiKhoanRow moi = repo.GetTaiKhoan(tk.ID);
+            if (moi != null)
+                NguoiDung.CapNhatCookie(HttpContext.GetOwinContext().Authentication, moi);
+            TempData["ThongBao"] = "Đã lưu thông tin tài khoản.";
+            return RedirectToAction("CuaToi");
+        }
+        #endregion
+
         #region Đổi mật khẩu
         public ActionResult DoiMatKhau()
         {
@@ -219,9 +335,9 @@ namespace PM_TraCuuThongTinMyPham.Controllers
                 model.Loi = "Lỗi khi lưu dữ liệu: " + repo.Loi;
                 return View(model);
             }
-            //ghi lại cookie để bỏ cờ "phải đổi mật khẩu"
+            //ghi lại cookie để bỏ cờ "phải đổi mật khẩu" (giữ lựa chọn "Lưu tài khoản" của lần đăng nhập)
             tk.PhaiDoiMatKhau = false;
-            GhiCookieDangNhap(tk, false);
+            NguoiDung.CapNhatCookie(HttpContext.GetOwinContext().Authentication, tk);
             TempData["ThongBao"] = "Đã đổi mật khẩu.";
             return RedirectToAction("Index", "Home");
         }

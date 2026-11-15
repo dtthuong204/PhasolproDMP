@@ -1,0 +1,87 @@
+﻿@using PM_TraCuuThongTinMyPham.Models
+@model SuaTaiKhoanVM
+@{
+    TaiKhoanRow tk = Model.TaiKhoan;
+    bool laDoanhNghiep = tk.VaiTro == VaiTro.DoanhNghiep;
+}
+
+@helper Xem(string nhan, string giaTri)
+{
+    <label class="form-field">
+        <span class="form-label">@nhan</span>
+        <input class="form-input" type="text" value="@giaTri" readonly tabindex="-1" />
+    </label>
+}
+
+<!--Tài khoản của tôi: mọi vai trò xem và tự sửa thông tin; tên đăng nhập, vai trò không sửa;
+    doanh nghiệp không sửa mã số doanh nghiệp (liên hệ quản trị)-->
+<section class="reg-page">
+    <h1 class="reg-title">Tài khoản của tôi</h1>
+
+    @if (!String.IsNullOrEmpty(Model.ThongBao))
+    {
+        <div class="notice notice-ok">@Model.ThongBao</div>
+    }
+    @if (Model.DSLoi.Count > 0)
+    {
+        <div class="notice notice-error">
+            <ul class="reg-errors">
+                @foreach (string loi in Model.DSLoi)
+                {
+                    <li>@loi</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="reg-form">
+        <section class="reg-section">
+            <h2 class="reg-head">Thông tin chung</h2>
+            <div class="form-grid">
+                @Xem("Tên đăng nhập", tk.TenDangNhap)
+                @Xem("Vai trò", VaiTro.TenHienThi(tk.VaiTro))
+                @Xem("Ngày tạo", tk.NgayTao.ToString("dd/MM/yyyy"))
+            </div>
+        </section>
+
+        @using (Html.BeginForm("CuaToi", "TaiKhoan", FormMethod.Post, new { @class = "reg-form" }))
+        {
+            @Html.AntiForgeryToken()
+
+            if (!laDoanhNghiep)
+            {
+                <section class="reg-section">
+                    <h2 class="reg-head">Thông tin tài khoản</h2>
+                    <div class="form-grid">
+                        <label class="form-field">
+                            <span class="form-label">@(tk.VaiTro == VaiTro.SoYTe ? "Tên đơn vị" : "Họ và tên")<span class="req">*</span></span>
+                            <input class="form-input" type="text" name="HoTen" value="@Model.HoTen" required />
+                        </label>
+                        <label class="form-field">
+                            <span class="form-label">Email@(tk.VaiTro == VaiTro.CaNhan ? new HtmlString("<span class=\"req\">*</span>") : new HtmlString(""))</span>
+                            <input class="form-input" type="email" name="Email" value="@Model.Email" placeholder="Nhập email" @(tk.VaiTro == VaiTro.CaNhan ? "required" : "") />
+                        </label>
+                        <label class="form-field">
+                            <span class="form-label">Số điện thoại</span>
+                            <input class="form-input" type="text" name="SoDienThoai" value="@Model.SoDienThoai" placeholder="Nhập số điện thoại" />
+                        </label>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <p class="reg-note reg-note-top">Họ tên, email đăng nhập, số điện thoại của tài khoản lấy theo Người đại diện. Muốn sửa mã số doanh nghiệp, liên hệ quản trị hệ thống.</p>
+                @Html.Partial("_ThongTinDoanhNghiep", Model.DoanhNghiep, new ViewDataDictionary { { "KhoaMaSo", true } })
+            }
+
+            <div class="reg-buttons">
+                <button class="btn btn-primary" type="submit">Lưu</button>
+                <a class="btn btn-outline" href="@Url.Action("DoiMatKhau")">Đổi mật khẩu</a>
+            </div>
+        }
+    </div>
+</section>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/taikhoan.js")"></script>
+}
