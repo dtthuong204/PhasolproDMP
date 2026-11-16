@@ -32,6 +32,9 @@
 
     var DS_SO_DONG = [50, 100, 200];
 
+    // bề rộng tối thiểu (px) của cột không đặt độ rộng (vd CHEMICAL NAME / INN của Annex II), xem veBang
+    var RONG_COT_TU_DO = 200;
+
     // tên loại danh mục SYT theo bảng (cột "Danh mục SYT" của Annex EU)
     var LOAI_SYT = {
         SYT_DanhMucCam: { ten: "Cấm sử dụng", lop: "cam", ma: "syt-cam" },
@@ -660,7 +663,12 @@
         var dsPhu = $.grep(dm.dsCot, function (c) { return c.gopVao && cotHien(dm, c); });
         var sx = laySapXep(dm);
 
-        var html = '<div class="dm-card"><table class="dm-table"><colgroup>';
+        // bảng dùng table-layout: fixed, cột không đặt độ rộng chỉ được chia phần còn thừa sau các cột cố định.
+        // Màn hình hẹp (điện thoại) hoặc hiện nhiều cột thì phần thừa bằng 0: cột co về 0px, chữ tràn đè lên cột bên cạnh.
+        // Đặt bề rộng tối thiểu cho khung bảng để cột đó có ít nhất RONG_COT_TU_DO px; không đủ chỗ thì khung kết quả cuộn ngang.
+        var rongToiThieu = 2;   // 2px viền trái + phải của khung bảng
+        $.each(dsCot, function (i, c) { rongToiThieu += c.rong || RONG_COT_TU_DO; });
+        var html = '<div class="dm-card" style="min-width:' + rongToiThieu + 'px"><table class="dm-table"><colgroup>';
         $.each(dsCot, function (i, c) { html += c.rong ? '<col style="width:' + c.rong + 'px">' : "<col>"; });
         html += "</colgroup><thead><tr>";
         $.each(dsCot, function (i, c) {
