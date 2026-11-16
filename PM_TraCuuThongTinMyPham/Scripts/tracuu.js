@@ -829,6 +829,9 @@ $(function () {
             ketQua.dangTra = false;
             $("#nut-tra-cuu").prop("disabled", false);
             veKetQua();
+            // màn hình hẹp: kết quả nằm dưới danh sách nhập, cuộn xuống để thấy kết quả
+            if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches)
+                document.getElementById("hang-tab").scrollIntoView();
         });
     }
 
