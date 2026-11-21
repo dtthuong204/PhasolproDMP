@@ -26,7 +26,7 @@ Mọi trang trừ trang chủ, Đăng nhập, Đăng ký đều phải đăng nh
 | Nhánh | Cơ sở dữ liệu | Chuỗi kết nối dùng |
 |---|---|---|
 | `main` | SQL Server | `TraCuuDb` |
-| `mysql` | MySQL 8.4 (thư viện MySql.Data 6.9.12) | `TraCuuMySql` |
+| `mysql` | MySQL 8.4 (thư viện MySql.Data 6.9.12), chỉ còn để lưu, không phát triển tiếp | `TraCuuMySql` |
 
 ## Chạy trên máy
 
