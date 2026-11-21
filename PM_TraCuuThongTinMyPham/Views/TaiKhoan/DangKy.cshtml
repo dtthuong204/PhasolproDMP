@@ -1,0 +1,97 @@
+﻿@model PM_TraCuuThongTinMyPham.Models.DangKyVM
+@{
+    bool laDoanhNghiep = Model.Loai == "doanhnghiep";
+    PM_TraCuuThongTinMyPham.Models.DangKyDoanhNghiepVM dn = Model.DoanhNghiep;
+}
+
+@helper O(string nhan, string ten, string giaTri, bool batBuoc, string goiY, string kieu, string danhSach)
+{
+    <label class="form-field">
+        <span class="form-label">@(nhan)@(batBuoc ? new HtmlString("<span class=\"req\">*</span>") : new HtmlString(""))</span>
+        <input class="form-input" type="@kieu" name="@ten" value="@giaTri" placeholder="@goiY" @(batBuoc ? "required" : "")
+               @(danhSach != null ? "list=" + danhSach : "") @(kieu == "password" ? "autocomplete=new-password" : "") />
+    </label>
+}
+
+<!--Đăng ký: tab Cá nhân (để tra cứu, xem danh mục) và Doanh nghiệp (thêm gửi báo cáo); tài khoản Sở Y tế do Admin cấp-->
+<section class="reg-page">
+    <h1 class="reg-title">Đăng ký tài khoản</h1>
+    <nav class="sub-tabs reg-tabs">
+        <a class="sub-tab @(laDoanhNghiep ? "" : "active")" href="@Url.Action("DangKy", new { loai = "canhan" })">Cá nhân</a>
+        <a class="sub-tab @(laDoanhNghiep ? "active" : "")" href="@Url.Action("DangKy", new { loai = "doanhnghiep" })">Doanh nghiệp</a>
+    </nav>
+
+    @if (Model.DSLoi.Count > 0)
+    {
+        <div class="notice notice-error">
+            <ul class="reg-errors">
+                @foreach (string loi in Model.DSLoi)
+                {
+                    <li>@loi</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @using (Html.BeginForm("DangKy", "TaiKhoan", FormMethod.Post, new { @class = "reg-form", id = "form-dang-ky" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Loai" value="@Model.Loai" />
+
+        if (!laDoanhNghiep)
+        {
+            <section class="reg-section">
+                <h2 class="reg-head">Thông tin cá nhân</h2>
+                <div class="form-grid">
+                    @O("Họ và tên", "CaNhan.HoTen", Model.CaNhan.HoTen, true, "Nhập họ và tên", "text", null)
+                    @O("Email", "CaNhan.Email", Model.CaNhan.Email, true, "Nhập email", "email", null)
+                    @O("Số điện thoại", "CaNhan.SoDienThoai", Model.CaNhan.SoDienThoai, false, "Nhập số điện thoại", "text", null)
+                </div>
+            </section>
+            <section class="reg-section">
+                <h2 class="reg-head">Tài khoản đăng nhập</h2>
+                <div class="form-grid">
+                    @O("Tên đăng nhập", "CaNhan.TenDangNhap", Model.CaNhan.TenDangNhap, true, "Chữ không dấu, số, . _ -", "text", null)
+                    @O("Mật khẩu", "CaNhan.MatKhau", "", true, "Tối thiểu 8 ký tự, có chữ hoa, chữ thường, số", "password", null)
+                    @O("Nhập lại mật khẩu", "CaNhan.NhapLaiMatKhau", "", true, "Nhập lại mật khẩu", "password", null)
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="reg-section">
+                <h2 class="reg-head">Tài khoản đăng nhập</h2>
+                <div class="form-grid">
+                    @O("Tên đăng nhập", "DoanhNghiep.TenDangNhap", dn.TenDangNhap, true, "Chữ không dấu, số, . _ -", "text", null)
+                    @O("Mật khẩu", "DoanhNghiep.MatKhau", "", true, "Tối thiểu 8 ký tự, có chữ hoa, chữ thường, số", "password", null)
+                    @O("Nhập lại mật khẩu", "DoanhNghiep.NhapLaiMatKhau", "", true, "Nhập lại mật khẩu", "password", null)
+                </div>
+            </section>
+
+            @Html.Partial("_ThongTinDoanhNghiep", dn)
+        }
+
+        if (!String.IsNullOrEmpty(Model.ReCaptchaSiteKey))
+        {
+            <div class="reg-captcha">
+                <div class="g-recaptcha" data-sitekey="@Model.ReCaptchaSiteKey"></div>
+            </div>
+        }
+
+        <div class="reg-buttons">
+            <button class="btn btn-primary" type="submit">Đăng ký</button>
+            <button class="btn btn-outline" type="reset">Đặt lại</button>
+        </div>
+        <p class="auth-foot">Đã có tài khoản? <a href="@Url.Action("DangNhap")">Đăng nhập</a></p>
+    }
+</section>
+
+@section scripts {
+    @if (!String.IsNullOrEmpty(Model.ReCaptchaSiteKey))
+    {
+        <!--Google reCAPTCHA v2, giao diện tiếng Việt-->
+        <script src="https://www.google.com/recaptcha/api.js?hl=vi" async defer></script>
+    }
+    <!--người liên hệ: thêm / bỏ dòng-->
+    <script src="@Url.Content("~/Scripts/taikhoan.js")"></script>
+}

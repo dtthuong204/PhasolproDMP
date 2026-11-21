@@ -1,0 +1,40 @@
+﻿@model PM_TraCuuThongTinMyPham.Models.DoiMatKhauVM
+
+<!--Đổi mật khẩu (theo docs/giao-dien/HỆ THỐNG TÀI KHOẢN/Đổi mật khẩu.png)-->
+<section class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-title">Đổi mật khẩu</h1>
+        @using (Html.BeginForm("DoiMatKhau", "TaiKhoan", FormMethod.Post, new { @class = "auth-form" }))
+        {
+            @Html.AntiForgeryToken()
+            if (Model.BatBuoc)
+            {
+                <div class="notice notice-warn">Bạn đang dùng mật khẩu tạm. Hãy đổi mật khẩu trước khi tiếp tục.</div>
+            }
+            if (!String.IsNullOrEmpty(Model.Loi))
+            {
+                <div class="notice notice-error">@Model.Loi</div>
+            }
+            <label class="form-field">
+                <span class="form-label">Mật khẩu hiện tại</span>
+                <input class="form-input" type="password" name="MatKhauHienTai" autocomplete="current-password" required autofocus />
+            </label>
+            <label class="form-field">
+                <span class="form-label">Mật khẩu mới</span>
+                <input class="form-input" type="password" name="MatKhauMoi" autocomplete="new-password" required />
+                <span class="form-hint">Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và số.</span>
+            </label>
+            <label class="form-field">
+                <span class="form-label">Xác nhận mật khẩu mới</span>
+                <input class="form-input" type="password" name="NhapLaiMatKhau" autocomplete="new-password" required />
+            </label>
+            <div class="auth-buttons">
+                @if (!Model.BatBuoc)
+                {
+                    <a class="btn btn-outline" href="@Url.Action("Index", "Home")">Hủy</a>
+                }
+                <button class="btn btn-primary" type="submit">Đổi mật khẩu</button>
+            </div>
+        }
+    </div>
+</section>

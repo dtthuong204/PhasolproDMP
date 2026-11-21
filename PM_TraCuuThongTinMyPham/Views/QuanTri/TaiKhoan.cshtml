@@ -1,0 +1,129 @@
+﻿@using PM_TraCuuThongTinMyPham.Models
+@model QuanLyTaiKhoanVM
+@{
+    //các tab lọc theo vai trò: mã vai trò ("" = tất cả) và tên hiển thị
+    string[][] dsTab = {
+        new string[] { "", "Tất cả" },
+        new string[] { VaiTro.DoanhNghiep, "Doanh nghiệp" },
+        new string[] { VaiTro.SoYTe, "Sở Y tế" },
+        new string[] { VaiTro.CaNhan, "Cá nhân" },
+        new string[] { VaiTro.Admin, "Quản trị" }
+    };
+}
+
+<!--Quản lý tài khoản (Admin): lọc, tìm, thêm, sửa, khóa / mở khóa, đặt lại mật khẩu, xóa-->
+<section class="admin-page">
+    <div class="admin-head">
+        <h1>Quản lý tài khoản</h1>
+        <a class="btn btn-primary" href="@Url.Action("ThemTaiKhoan", new { vaiTro = Model.VaiTroLoc })">+ Thêm tài khoản</a>
+    </div>
+
+    @if (!String.IsNullOrEmpty(Model.ThongBao))
+    {
+        <div class="notice notice-ok">@Model.ThongBao</div>
+    }
+    @if (!String.IsNullOrEmpty(Model.Loi))
+    {
+        <div class="notice notice-error">@Model.Loi</div>
+    }
+
+    <div class="admin-toolbar">
+        <nav class="sub-tabs admin-tabs">
+            @foreach (string[] tab in dsTab)
+            {
+                int so = Model.SoTheoVaiTro.ContainsKey(tab[0]) ? Model.SoTheoVaiTro[tab[0]] : 0;
+                <a class="sub-tab @(Model.VaiTroLoc == tab[0] ? "active" : "")" href="@Url.Action("TaiKhoan", new { vaiTro = tab[0], tuKhoa = Model.TuKhoa })">@tab[1] <span class="sub-count">@so</span></a>
+            }
+        </nav>
+        <form class="admin-search" method="get" action="@Url.Action("TaiKhoan")">
+            <input type="hidden" name="vaiTro" value="@Model.VaiTroLoc" />
+            <input class="form-input" type="search" name="tuKhoa" value="@Model.TuKhoa" placeholder="Tìm tên đăng nhập, họ tên, doanh nghiệp, email" />
+            <button class="btn btn-outline btn-sm" type="submit">Tìm</button>
+        </form>
+    </div>
+
+    <div class="card table-card">
+        <table class="data-table admin-table">
+            <thead>
+                <tr>
+                    <th style="width:48px">STT</th>
+                    <th>Tên tài khoản</th>
+                    <th style="width:120px">Vai trò</th>
+                    <th>Email</th>
+                    <th style="width:100px">Ngày tạo</th>
+                    <th style="width:130px">Đăng nhập gần nhất</th>
+                    <th style="width:110px">Trạng thái</th>
+                    <th style="width:300px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DSTaiKhoan.Count == 0)
+                {
+                    <tr><td colspan="8" class="empty-row">Không có tài khoản nào.</td></tr>
+                }
+                @for (int i = 0; i < Model.DSTaiKhoan.Count; i++)
+                {
+                    TaiKhoanRow tk = Model.DSTaiKhoan[i];
+                    bool laMinh = tk.ID == Model.IDDangDangNhap;
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>
+                            <a class="cell-name cell-link" href="@Url.Action("SuaTaiKhoan", new { id = tk.ID })">@tk.TenHienThi</a>
+                            <span class="cell-sub">@(tk.TenDangNhap + (String.IsNullOrEmpty(tk.TenDoanhNghiep) ? "" : " · " + tk.HoTen))@(laMinh ? " · bạn" : "")</span>
+                        </td>
+                        <td><span class="role-tag role-@tk.VaiTro.ToLower()">@VaiTro.TenHienThi(tk.VaiTro)</span></td>
+                        <td>@(String.IsNullOrEmpty(tk.Email) ? "-" : tk.Email)</td>
+                        <td>@tk.NgayTao.ToString("dd/MM/yyyy")</td>
+                        <td>@(tk.LanDangNhapCuoi.HasValue ? tk.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm") : "-")</td>
+                        <td>
+                            @if (tk.DangHoatDong)
+                            {
+                                <span class="status st-chophep">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="status st-cam">Đã khóa</span>
+                            }
+                        </td>
+                        <td>
+                            <!--các nút đặt trong div (không đặt display:flex lên td: td mất kiểu ô bảng, không cao theo dòng)-->
+                            <div class="admin-actions">
+                            <a class="btn-xs btn-xs-primary" href="@Url.Action("SuaTaiKhoan", new { id = tk.ID })">Sửa</a>
+                            @*tài khoản đang đăng nhập: không đặt lại mật khẩu, không khóa ở đây (đổi mật khẩu bằng mục Đổi mật khẩu)*@
+                            @if (!laMinh)
+                            {
+                                using (Html.BeginForm("DatLaiMatKhau", "QuanTri", FormMethod.Post, new { onsubmit = "return confirm('Đặt lại mật khẩu tạm cho tài khoản " + tk.TenDangNhap + "?');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@tk.ID" />
+                                    <input type="hidden" name="vaiTro" value="@Model.VaiTroLoc" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <button class="btn-xs btn-xs-primary" type="submit">Đặt lại mật khẩu</button>
+                                }
+                                using (Html.BeginForm("DatTrangThai", "QuanTri", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@tk.ID" />
+                                    <input type="hidden" name="dangHoatDong" value="@(tk.DangHoatDong ? "false" : "true")" />
+                                    <input type="hidden" name="vaiTro" value="@Model.VaiTroLoc" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <button class="btn-xs @(tk.DangHoatDong ? "" : "btn-xs-primary")" type="submit">@(tk.DangHoatDong ? "Khóa" : "Mở khóa")</button>
+                                }
+                                //xóa hẳn (kèm thông tin doanh nghiệp nếu có): hỏi lại trước khi xóa, tên đăng nhập chỉ gồm chữ không dấu, số, . _ -
+                                using (Html.BeginForm("XoaTaiKhoan", "QuanTri", FormMethod.Post, new { onsubmit = "return confirm('Xóa hẳn tài khoản " + tk.TenDangNhap + (tk.DoanhNghiepID.HasValue ? " cùng thông tin doanh nghiệp" : "") + "? Không khôi phục được. Nếu chỉ muốn chặn đăng nhập, hãy dùng Khóa.');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@tk.ID" />
+                                    <input type="hidden" name="vaiTro" value="@Model.VaiTroLoc" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <button class="btn-xs" type="submit">Xóa</button>
+                                }
+                            }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

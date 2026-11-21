@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace PM_TraCuuThongTinMyPham.Models
 {
@@ -32,7 +32,7 @@ namespace PM_TraCuuThongTinMyPham.Models
         //null nếu không có lỗi
         public string Loi { get; set; }
 
-        public static ChiTietVM fromReaderAsean(SqlDataReader reader)
+        public static ChiTietVM fromReaderAsean(MySqlDataReader reader)
         {
             if (reader == null)
                 return null;
@@ -55,7 +55,7 @@ namespace PM_TraCuuThongTinMyPham.Models
             };
         }
 
-        public static ChiTietVM fromReaderEU(SqlDataReader reader)
+        public static ChiTietVM fromReaderEU(MySqlDataReader reader)
         {
             if (reader == null)
                 return null;

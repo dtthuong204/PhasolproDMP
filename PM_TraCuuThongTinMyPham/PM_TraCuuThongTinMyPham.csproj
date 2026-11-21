@@ -40,6 +40,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="MySql.Data">
+      <HintPath>..\packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.2.0.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Owin.Security.2.0.2\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.2.0.0\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -110,10 +130,19 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\DanhMucController.cs" />
     <Compile Include="Controllers\TraCuuController.cs" />
+    <Compile Include="Controllers\PhanQuyenAttribute.cs" />
+    <Compile Include="Controllers\TaiKhoanController.cs" />
+    <Compile Include="Controllers\QuanTriController.cs" />
     <Compile Include="Data\KetNoiDB.cs" />
+    <Compile Include="Data\KiemTraNhap.cs" />
+    <Compile Include="Data\ChongDoMatKhau.cs" />
+    <Compile Include="Data\MatKhau.cs" />
+    <Compile Include="Data\ReCaptcha.cs" />
+    <Compile Include="Data\TaiKhoanRepository.cs" />
     <Compile Include="Data\BoNhoDanhMucXem.cs" />
     <Compile Include="Data\DanhMucXemRepository.cs" />
     <Compile Include="Data\BoNhoTraCuu.cs" />
@@ -126,18 +155,25 @@
     <Compile Include="Models\DanhMucVM.cs" />
     <Compile Include="Models\TraCuuVM.cs" />
     <Compile Include="Models\TraCuuV2VM.cs" />
+    <Compile Include="Models\NguoiDung.cs" />
+    <Compile Include="Models\TaiKhoanVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Config\ConnectionStrings.config" />
-    <Content Include="Config\ConnectionStrings.config.example" />
+    <Content Include="Config\ConnectionStrings.config.example">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\AppSettings.secret.config.example" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Scripts\tracuu.js" />
+    <Content Include="Scripts\taikhoan.js" />
     <Content Include="Scripts\danhmuc.js" />
     <Content Include="Scripts\xlsx.full.min.js" />
     <Content Include="Web.config" />
@@ -153,8 +189,20 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\KhongTimThay.cshtml" />
     <Content Include="Views\DanhMuc\Index.cshtml" />
     <Content Include="Views\TraCuu\Index.cshtml" />
+    <Content Include="Views\Home\GioiThieu.cshtml" />
+    <Content Include="Views\TaiKhoan\DangNhap.cshtml" />
+    <Content Include="Views\TaiKhoan\_FormDangNhap.cshtml" />
+    <Content Include="Views\TaiKhoan\DangKy.cshtml" />
+    <Content Include="Views\TaiKhoan\DoiMatKhau.cshtml" />
+    <Content Include="Views\TaiKhoan\KhongCoQuyen.cshtml" />
+    <Content Include="Views\TaiKhoan\_ThongTinDoanhNghiep.cshtml" />
+    <Content Include="Views\TaiKhoan\CuaToi.cshtml" />
+    <Content Include="Views\QuanTri\TaiKhoan.cshtml" />
+    <Content Include="Views\QuanTri\ThemTaiKhoan.cshtml" />
+    <Content Include="Views\QuanTri\SuaTaiKhoan.cshtml" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

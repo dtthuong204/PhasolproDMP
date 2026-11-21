@@ -4227,7 +4227,41 @@ body.app-page {
 }
 
 /* =====================================================================
-   Màn hình hẹp (điện thoại): trang chủ, Danh mục, Tra cứu
+   Quản lý tài khoản (bản nộp, TK4): ô chỉ xem, ghi chú trong form, tên tài khoản bấm được
+   ===================================================================== */
+.form-input[readonly],
+.form-input:disabled {
+    border-color: var(--line);
+    background: #f3f4f7;
+    color: #3b3f52;
+}
+
+.reg-note {
+    margin: 0;
+    padding: 0 18px 14px;
+    color: #4b5263;
+    font-size: 12px;
+}
+
+.reg-note-top {
+    padding: 0 2px;
+}
+
+a.cell-link {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+a.cell-link:hover {
+    text-decoration: underline;
+}
+
+a.btn-xs {
+    text-decoration: none;
+}
+
+/* =====================================================================
+   Màn hình hẹp (điện thoại): trang chủ, Danh mục, Tra cứu, Quản lý tài khoản, các form tài khoản
    Đặt cuối file để đè các quy tắc màn hình rộng ở trên. Màn hình từ 768px trở lên không đổi.
    ===================================================================== */
 @media (max-width: 767px) {
@@ -4383,5 +4417,42 @@ body.app-page {
 
     .file-options {
         gap: 8px 14px;
+    }
+
+    /* Quản lý tài khoản */
+    .admin-head {
+        gap: 12px;
+    }
+
+    .admin-head h1 {
+        font-size: 22px;
+    }
+
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .admin-search .form-input {
+        width: auto;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .admin-table {
+        min-width: 860px;
+    }
+
+    /* form Đăng ký, Thêm / Sửa tài khoản, Tài khoản của tôi: mỗi ô một dòng */
+    .form-grid,
+    .form-grid-2,
+    .form-grid-4 {
+        grid-template-columns: 1fr;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Text;
+using MySql.Data.MySqlClient;
 using PM_TraCuuThongTinMyPham.Models;
 
 namespace PM_TraCuuThongTinMyPham.Data
@@ -15,45 +15,45 @@ namespace PM_TraCuuThongTinMyPham.Data
         #region Câu SQL
         //phần cuối chung của các Annex ASEAN: căn cứ, ngày (dd/MM/yyyy) và trạng thái hiệu lực tính sẵn trong vw_ACD_TatCa
         private const string SqlCuoiAsean = @",
-       a.CanCu, CONVERT(varchar(10), a.NgayApDung, 103) AS NgayApDung,
-       CONVERT(varchar(10), a.NgayHetHieuLuc, 103) AS NgayHetHieuLuc, a.GhiChu, v.TrangThaiHieuLuc
-FROM dbo.{0} AS a
-JOIN dbo.vw_ACD_TatCa AS v ON v.Bang = N'{0}' AND v.RowID = a.ID
+       a.CanCu, DATE_FORMAT(a.NgayApDung, '%d/%m/%Y') AS NgayApDung,
+       DATE_FORMAT(a.NgayHetHieuLuc, '%d/%m/%Y') AS NgayHetHieuLuc, a.GhiChu, v.TrangThaiHieuLuc
+FROM `{0}` AS a
+JOIN vw_ACD_TatCa AS v ON v.Bang = '{0}' AND v.RowID = a.ID
 ORDER BY a.ID;";
 
         //các cột tham khảo chung của 5 Annex EU
         private const string SqlCuoiEU = @",
-       [Regulation] AS Regulation, [Other Directives/Regulations] AS ChiThiKhac, [SCCS opinions] AS SCCS,
-       [Chemical/IUPAC Name] AS IUPAC, [Identified INGREDIENTS or substances e.g.] AS ThanhPhanNhanDien,
-       [CMR] AS CMR, CONVERT(varchar(10), [Update date], 103) AS NgayCapNhat
-FROM dbo.{0}
+       `Regulation` AS Regulation, `Other Directives/Regulations` AS ChiThiKhac, `SCCS opinions` AS SCCS,
+       `Chemical/IUPAC Name` AS IUPAC, `Identified INGREDIENTS or substances e.g.` AS ThanhPhanNhanDien,
+       `CMR` AS CMR, DATE_FORMAT(`Update date`, '%d/%m/%Y') AS NgayCapNhat
+FROM `{0}`
 ORDER BY ID;";
 
         //cột giới hạn của Annex EU III, IV, V, VI
         private const string SqlGioiHanEU = @",
-       [Product Type, body parts] AS PhamVi, [Maximum concentration in ready for use preparation] AS GioiHan,
-       [Other] AS Khac, [Wording of conditions of use and warnings] AS CanhBao";
+       `Product Type, body parts` AS PhamVi, `Maximum concentration in ready for use preparation` AS GioiHan,
+       `Other` AS Khac, `Wording of conditions of use and warnings` AS CanhBao";
 
         private const string SqlSyt = @"
 SELECT ID, Ten, MoTa, ThongTin, GhiChu, {1} AS TrangThaiDuLieu
-FROM dbo.{0}
-WHERE Ten IS NOT NULL AND LTRIM(RTRIM(Ten)) <> N''
+FROM `{0}`
+WHERE Ten IS NOT NULL AND TRIM(Ten) <> ''
 ORDER BY Ten, ID;";
 
         //3 kết quả đầu: tên Annex, chú thích ASEAN, liên kết SYT -> EU (bỏ dòng EU đã xóa/chuyển)
         private const string SqlPhuTro = @"
-SELECT Source, REPLACE(Annex, N'Annex ', N'') AS Annex, Name, TenTV
-FROM dbo.AnnexList;
+SELECT Source, REPLACE(Annex, 'Annex ', '') AS Annex, Name, TenTV
+FROM AnnexList;
 
-SELECT REPLACE(Annex, N'Annex ', N'') AS Annex, Number, Notes, Classification
-FROM dbo.ACD_Note
+SELECT REPLACE(Annex, 'Annex ', '') AS Annex, Number, Notes, Classification
+FROM ACD_Note
 WHERE Annex IS NOT NULL AND Notes IS NOT NULL
 ORDER BY ID;
 
 SELECT l.BangSYT, l.SytID, l.ThamChieuGoc,
-       CASE WHEN e.RowID IS NULL THEN NULL ELSE CONCAT(l.EUBang, N'#', l.EURowID) END AS KhoaEU
-FROM dbo.SYT_EU_LienKet AS l
-LEFT JOIN dbo.vw_EU_TatCa AS e ON e.Bang = l.EUBang AND e.RowID = l.EURowID AND e.DaXoa = 0
+       CASE WHEN e.RowID IS NULL THEN NULL ELSE CONCAT(l.EUBang, '#', l.EURowID) END AS KhoaEU
+FROM SYT_EU_LienKet AS l
+LEFT JOIN vw_EU_TatCa AS e ON e.Bang = l.EUBang AND e.RowID = l.EURowID AND e.DaXoa = 0
 ORDER BY l.BangSYT, l.SytID, l.ID;";
         #endregion
 
@@ -77,20 +77,20 @@ ORDER BY l.BangSYT, l.SytID, l.ID;";
         {
             List<DinhNghia> ds = new List<DinhNghia>();
             //tên hiển thị theo app cũ: "Cấm sử dụng (EU)", "Giới hạn (EU)", "Cho phép (EU)" (không ghi Sở Y tế)
-            ds.Add(TaoSyt("syt-cam", "SYT_DanhMucCam", "Cấm sử dụng (EU)", "Danh mục cấm sử dụng (EU)", "ISNULL(Data, N'Gốc')"));
-            ds.Add(TaoSyt("syt-gh", "SYT_DanhMucGioiHan", "Giới hạn (EU)", "Danh mục giới hạn (EU)", "ISNULL(Data, N'Gốc')"));
-            ds.Add(TaoSyt("syt-cp", "SYT_DanhMucChoPhep", "Cho phép (EU)", "Danh mục cho phép (EU)", "N'Gốc'"));
+            ds.Add(TaoSyt("syt-cam", "SYT_DanhMucCam", "Cấm sử dụng (EU)", "Danh mục cấm sử dụng (EU)", "IFNULL(`Data`, 'Gốc')"));
+            ds.Add(TaoSyt("syt-gh", "SYT_DanhMucGioiHan", "Giới hạn (EU)", "Danh mục giới hạn (EU)", "IFNULL(`Data`, 'Gốc')"));
+            ds.Add(TaoSyt("syt-cp", "SYT_DanhMucChoPhep", "Cho phép (EU)", "Danh mục cho phép (EU)", "'Gốc'"));
 
             ds.Add(TaoEU("eu-2", "II", "Chất cấm",
-                "[Reference Number] AS RefNo, [Chemical name / INN] AS TenChat, [CAS Number] AS CAS, [EC Number] AS EC"));
+                "`Reference Number` AS RefNo, `Chemical name / INN` AS TenChat, `CAS Number` AS CAS, `EC Number` AS EC"));
             ds.Add(TaoEU("eu-3", "III", "Chất giới hạn",
-                "[Reference Number] AS RefNo, [Chemical name / INN] AS TenChat, [Name of Common Ingredients Glossary] AS TenINCI, [CAS Number] AS CAS, [EC Number] AS EC" + SqlGioiHanEU));
+                "`Reference Number` AS RefNo, `Chemical name / INN` AS TenChat, `Name of Common Ingredients Glossary` AS TenINCI, `CAS Number` AS CAS, `EC Number` AS EC" + SqlGioiHanEU));
             ds.Add(TaoEU("eu-4", "IV", "Phẩm màu",
-                "[Reference Number] AS RefNo, [Chemical name] AS TenChat, [Colour index Number / Name of Common Ingredients Glossary] AS TenINCI, [CAS Number] AS CAS, [EC Number] AS EC, [Color] AS Mau" + SqlGioiHanEU));
+                "`Reference Number` AS RefNo, `Chemical name` AS TenChat, `Colour index Number / Name of Common Ingredients Glossary` AS TenINCI, `CAS Number` AS CAS, `EC Number` AS EC, `Color` AS Mau" + SqlGioiHanEU));
             ds.Add(TaoEU("eu-5", "V", "Chất bảo quản",
-                "[Reference Number] AS RefNo, [Chemical name / INN] AS TenChat, [Name of Common Ingredients Glossary] AS TenINCI, [CAS Number] AS CAS, [EC Number] AS EC" + SqlGioiHanEU));
+                "`Reference Number` AS RefNo, `Chemical name / INN` AS TenChat, `Name of Common Ingredients Glossary` AS TenINCI, `CAS Number` AS CAS, `EC Number` AS EC" + SqlGioiHanEU));
             ds.Add(TaoEU("eu-6", "VI", "Chất lọc UV",
-                "[Reference Number] AS RefNo, [Chemical name / INN / XAN] AS TenChat, [Name of Common Ingredients Glossary] AS TenINCI, [CAS Number] AS CAS, [EC Number] AS EC" + SqlGioiHanEU));
+                "`Reference Number` AS RefNo, `Chemical name / INN / XAN` AS TenChat, `Name of Common Ingredients Glossary` AS TenINCI, `CAS Number` AS CAS, `EC Number` AS EC" + SqlGioiHanEU));
 
             ds.Add(TaoAsean("a-2", "II", "Chất cấm",
                 "a.RefNo, a.Substances AS TenChat, a.CASNumber AS CAS"));
@@ -149,11 +149,11 @@ ORDER BY l.BangSYT, l.SytID, l.ID;";
 
                 //tên Annex: khóa "EU#III", "ACD#III" -> [tên tiếng Anh, tên tiếng Việt]
                 Dictionary<string, string[]> tenAnnex = new Dictionary<string, string[]>();
-                using (SqlConnection conn = KetNoiDB.TaoKetNoi())
-                using (SqlCommand cmd = new SqlCommand(sql.ToString(), conn))
+                using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
+                using (MySqlCommand cmd = new MySqlCommand(sql.ToString(), conn))
                 {
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    KetNoiDB.MoKetNoi(conn);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                             tenAnnex[DocChuoi(reader, 0) + "#" + DocChuoi(reader, 1)] = new string[] { DocChuoi(reader, 2), DocChuoi(reader, 3) };
@@ -184,14 +184,14 @@ ORDER BY l.BangSYT, l.SytID, l.ID;";
             }
             catch (Exception ex)
             {
-                Loi = ex.Message;
+                Loi = KetNoiDB.ThongBaoLoi(ex);
                 kq = new DanhMucXemVM();
             }
             return kq;
         }
 
         //đọc một kết quả thành danh mục: tên cột theo tên đặt trong SQL, giá trị chuyển hết sang chuỗi
-        private static DanhMucRow DocDanhMuc(SqlDataReader reader, DinhNghia dn, Dictionary<string, string[]> tenAnnex)
+        private static DanhMucRow DocDanhMuc(MySqlDataReader reader, DinhNghia dn, Dictionary<string, string[]> tenAnnex)
         {
             DanhMucRow dm = new DanhMucRow
             {
@@ -229,7 +229,7 @@ ORDER BY l.BangSYT, l.SytID, l.ID;";
         }
 
         //giá trị ô dạng chuỗi đã bỏ khoảng trắng hai đầu; ô trống trả về null (JSON gọn hơn)
-        private static string DocChuoi(SqlDataReader reader, int i)
+        private static string DocChuoi(MySqlDataReader reader, int i)
         {
             if (reader.IsDBNull(i))
                 return null;
