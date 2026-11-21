@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 using System.Web.Script.Serialization;
 
 namespace PM_TraCuuThongTinMyPham.Models
@@ -71,7 +71,7 @@ namespace PM_TraCuuThongTinMyPham.Models
             DSThamChieu = new List<ThamChieuEURow>();
         }
 
-        public static ChatSytRow fromReader(MySqlDataReader reader)
+        public static ChatSytRow fromReader(SqlDataReader reader)
         {
             if (reader == null)
                 return null;
@@ -119,7 +119,7 @@ namespace PM_TraCuuThongTinMyPham.Models
         public string IUPAC { get; set; }
         public string ThanhPhanNhanDien { get; set; }
 
-        public static DongEURow fromReader(MySqlDataReader reader)
+        public static DongEURow fromReader(SqlDataReader reader)
         {
             if (reader == null)
                 return null;
@@ -158,7 +158,7 @@ namespace PM_TraCuuThongTinMyPham.Models
         [ScriptIgnore]
         public string TenGon { get; set; }
 
-        public static DongAseanRow fromReader(MySqlDataReader reader)
+        public static DongAseanRow fromReader(SqlDataReader reader)
         {
             if (reader == null)
                 return null;

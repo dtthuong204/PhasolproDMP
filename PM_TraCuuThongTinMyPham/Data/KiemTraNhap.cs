@@ -72,7 +72,7 @@ namespace PM_TraCuuThongTinMyPham.Data
                 (!Int32.TryParse(m.NamThanhLap.Trim(), out nam) || nam < 1900 || nam > DateTime.Now.Year))
                 loi.Add("Năm thành lập không hợp lệ.");
 
-            //độ dài theo cột của bảng DoanhNghiep (_rieng/sql-mysql/05_TaiKhoan.sql)
+            //độ dài theo cột của bảng DoanhNghiep (_rieng/sql/04_TaiKhoan.sql)
             KiemTraDoDai(loi, m.LoaiHinh, 100, "Loại hình doanh nghiệp");
             KiemTraDoDai(loi, m.MaSoDN, 50, "Mã số doanh nghiệp");
             KiemTraDoDai(loi, m.TenTiengViet, 300, "Tên doanh nghiệp (tiếng Việt)");

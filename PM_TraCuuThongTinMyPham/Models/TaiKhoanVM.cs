@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 
 namespace PM_TraCuuThongTinMyPham.Models
 {
@@ -46,7 +46,7 @@ namespace PM_TraCuuThongTinMyPham.Models
             get { return String.IsNullOrEmpty(TenDoanhNghiep) ? HoTen : TenDoanhNghiep; }
         }
 
-        public static TaiKhoanRow fromReader(MySqlDataReader reader)
+        public static TaiKhoanRow fromReader(SqlDataReader reader)
         {
             if (reader == null)
                 return null;
@@ -151,7 +151,7 @@ namespace PM_TraCuuThongTinMyPham.Models
         }
 
         //đọc 1 dòng bảng DoanhNghiep (ô trống thành chuỗi rỗng); danh sách liên hệ đọc riêng
-        public static DangKyDoanhNghiepVM fromReader(MySqlDataReader reader)
+        public static DangKyDoanhNghiepVM fromReader(SqlDataReader reader)
         {
             if (reader == null)
                 return null;

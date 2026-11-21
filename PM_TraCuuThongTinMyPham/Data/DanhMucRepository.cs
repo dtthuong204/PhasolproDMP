@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 using PM_TraCuuThongTinMyPham.Models;
 
 namespace PM_TraCuuThongTinMyPham.Data
@@ -16,24 +16,24 @@ namespace PM_TraCuuThongTinMyPham.Data
         //câu cuối đọc thẳng bảng EU_AnnexII vì vw_EU_TatCa không có các cột tham khảo (ghép vào bảng Cấm như app cũ)
         private const string SqlDanhMuc = @"
 SELECT BangSYT, ID, LoaiDanhMuc, Ten, MoTa, ThongTin, GhiChu
-FROM vw_SYT_TatCa
-WHERE Ten IS NOT NULL AND TRIM(Ten) <> '';
+FROM dbo.vw_SYT_TatCa
+WHERE Ten IS NOT NULL AND LTRIM(RTRIM(Ten)) <> N'';
 
 SELECT BangSYT, SytID, ThamChieuGoc, EUBang, EURowID
-FROM SYT_EU_LienKet
+FROM dbo.SYT_EU_LienKet
 ORDER BY BangSYT, SytID, ID;
 
 SELECT Bang, RowID, Annex, RefNo, TenChat, TenINCI, CAS, EC, DaXoa
-FROM vw_EU_TatCa;
+FROM dbo.vw_EU_TatCa;
 
 SELECT Bang, RowID, Annex, RefNo, TenChat, CAS, GioiHanToiDa, GhiChu, TrangThaiHieuLuc
-FROM vw_ACD_TatCa
-WHERE TrangThaiHieuLuc <> 'Đã loại bỏ' AND TenChat IS NOT NULL AND TRIM(TenChat) <> ''
+FROM dbo.vw_ACD_TatCa
+WHERE TrangThaiHieuLuc <> N'Đã loại bỏ' AND TenChat IS NOT NULL AND LTRIM(RTRIM(TenChat)) <> N''
 ORDER BY Annex, RowID;
 
-SELECT ID, `Regulation` AS Regulation, `Other Directives/Regulations` AS ChiThiKhac, `SCCS opinions` AS SCCS,
-       `Chemical/IUPAC Name` AS IUPAC, `Identified INGREDIENTS or substances e.g.` AS ThanhPhanNhanDien
-FROM EU_AnnexII;";
+SELECT ID, [Regulation] AS Regulation, [Other Directives/Regulations] AS ChiThiKhac, [SCCS opinions] AS SCCS,
+       [Chemical/IUPAC Name] AS IUPAC, [Identified INGREDIENTS or substances e.g.] AS ThanhPhanNhanDien
+FROM dbo.EU_AnnexII;";
 
         // Lấy toàn bộ danh mục SYT (kèm tham chiếu EU), Annex EU và Annex ASEAN đang hiệu lực
         public DanhMucTraCuu GetDanhMucTraCuu()
@@ -43,11 +43,11 @@ FROM EU_AnnexII;";
             try
             {
                 Dictionary<string, ChatSytRow> sytTheoKhoa = new Dictionary<string, ChatSytRow>();
-                using (MySqlConnection conn = KetNoiDB.TaoKetNoi())
-                using (MySqlCommand cmd = new MySqlCommand(SqlDanhMuc, conn))
+                using (SqlConnection conn = KetNoiDB.TaoKetNoi())
+                using (SqlCommand cmd = new SqlCommand(SqlDanhMuc, conn))
                 {
-                    KetNoiDB.MoKetNoi(conn);
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
